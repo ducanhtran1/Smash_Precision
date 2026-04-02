@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "A user of the SMASH PRECISION platform.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique Firebase Auth ID." },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string", "format": "uri" },
+        "bio": { "type": "string" },
+        "role": { "type": "string", "enum": ["client", "admin"] },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "theme": { "type": "string", "enum": ["stark", "void"] },
+            "currency": { "type": "string", "enum": ["USD", "EUR", "GBP"] },
+            "units": { "type": "string", "enum": ["MET", "IMP"] }
+          }
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "product": {
+      "title": "Product",
+      "description": "A technical athletic product.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["Rackets", "Shoes", "Shuttles", "Apparel"] },
+        "price": { "type": "number" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "specs": { "type": "object" },
+        "isLimited": { "type": "boolean" }
+      },
+      "required": ["id", "name", "category", "price"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "A customer order.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "quantity": { "type": "integer" },
+              "priceAtPurchase": { "type": "number" }
+            }
+          }
+        },
+        "total": { "type": "number" },
+        "status": { "type": "string", "enum": ["Order Received", "Processing", "Shipped", "Delivered"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "shippingAddress": { "type": "object" }
+      },
+      "required": ["id", "userId", "items", "total", "status", "createdAt"]
+    },
+    "wishlist": {
+      "title": "Wishlist",
+      "description": "A user's saved items (Gear Locker).",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "productIds": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "User profile data."
+    },
+    "/products/{productId}": {
+      "schema": "product",
+      "description": "Product catalog."
+    },
+    "/orders/{orderId}": {
+      "schema": "order",
+      "description": "Order history."
+    },
+    "/wishlists/{userId}": {
+      "schema": "wishlist",
+      "description": "User gear locker."
+    }
+  }
+}

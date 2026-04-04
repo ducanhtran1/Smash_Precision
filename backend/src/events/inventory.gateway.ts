@@ -5,9 +5,14 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { getCorsOrigins } from '@/cors-origins';
 
-//@WebSocketGateway({ cors: true }) allows your frontend to connect without CORS errors
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({
+  cors: {
+    origin: getCorsOrigins(),
+    credentials: true,
+  },
+})
 export class InventoryGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {

@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+frontend/dist
+backend/dist
+.git
+.gitignore
+**/*.md
+.env
+.env.*
+!.env.example
+coverage
+**/.vercel
+.vscode
+*.log

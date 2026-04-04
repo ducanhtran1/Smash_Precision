@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ShoppingBag, User, Search, Menu, X, ChevronRight, ArrowRight, Verified, CreditCard, Wallet, Thermometer, Droplets, Ruler, Waves, Settings, LayoutGrid, ReceiptText } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider, useCart } from './contexts/CartContext';
+import { ProductsProvider } from './contexts/ProductsContext';
 import { signInWithGoogle, logout } from './lib/firebase';
 import { cn } from './lib/utils';
-import { products } from './data/products';
 
 // Pages (to be implemented)
 import Home from './pages/Home';
@@ -142,7 +142,8 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
 export default function App() {
   return (
     <AuthProvider>
-      <CartProvider>
+      <ProductsProvider>
+        <CartProvider>
         <Router>
           <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
             <Navbar />
@@ -168,7 +169,8 @@ export default function App() {
             <MobileNav />
           </div>
         </Router>
-      </CartProvider>
+        </CartProvider>
+      </ProductsProvider>
     </AuthProvider>
   );
 }

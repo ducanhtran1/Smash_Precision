@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { useAuth } from '../contexts/AuthContext';
-import { handleFirestoreError, OperationType } from '../lib/error-handler';
+import { db } from '@/src/lib/firebase';
+import { useAuth } from '@/src/contexts/AuthContext';
+import { handleFirestoreError, OperationType } from '@/src/lib/error-handler';
 
 const Account = () => {
   const { user, profile } = useAuth();

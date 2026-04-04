@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { OrderItem } from '@/orders/entities/order-item.entity';
 
 @Entity()
@@ -30,7 +37,10 @@ export class Product {
   @Column({ nullable: true })
   subCategory: string;
 
-  @OneToMany(() => OrderItem, orderItem => orderItem.product)
+  @Column({ default: 100 })
+  stock: number;
+
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
   orderItems: OrderItem[];
 
   @CreateDateColumn()

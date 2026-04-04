@@ -1,13 +1,16 @@
 export interface Product {
   id: string;
   name: string;
-  category: 'Rackets' | 'Shoes' | 'Shuttles' | 'Apparel';
+  category: string;
   price: number;
   description: string;
   imageUrl: string;
-  specs: Record<string, string>;
+  /** Key/value specs; API may send JSON object or string */
+  specs: Record<string, string> | Record<string, unknown>;
   isLimited?: boolean;
   subCategory?: string;
+  /** Inventory from API (`stock` column) */
+  stock?: number;
 }
 
 export interface UserProfile {

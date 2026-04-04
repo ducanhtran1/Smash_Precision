@@ -1,13 +1,41 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { products } from '../data/products';
+import { useProducts } from '@/src/contexts/ProductsContext';
+
+/** Match URL slug (e.g. shuttles) to API category (Shuttles, Shuttle, etc.) */
+function categoryMatches(productCategory: string, urlSlug: string | undefined): boolean {
+  if (!urlSlug) return false;
+  const slug = urlSlug.toLowerCase().trim();
+  const cat = productCategory.toLowerCase().trim();
+  if (cat === slug) return true;
+  // Singular/plural (Shuttle vs Shuttles, Racket vs Rackets)
+  if (cat === slug.replace(/s$/, '') || cat + 's' === slug || cat === slug + 's') return true;
+  return false;
+}
 
 const Collection = () => {
   const { category } = useParams<{ category: string }>();
-  
-  const filteredProducts = category === 'all' 
-    ? products 
-    : products.filter(p => p.category.toLowerCase() === category);
+  const { products, loading, error } = useProducts();
+
+  const filteredProducts =
+    category === 'all'
+      ? products
+      : products.filter((p) => categoryMatches(p.category, category));
+
+  if (loading) return <div className="pt-40 px-10 text-center uppercase tracking-widest text-[10px]">Loading Archive...</div>;
+
+  if (error) {
+    return (
+      <div className="pt-40 px-10 max-w-screen-2xl mx-auto">
+        <p className="text-sm text-red-600 mb-2">Could not load products.</p>
+        <p className="text-xs text-neutral-500">{error}</p>
+        <p className="text-xs text-neutral-400 mt-4">
+          Ensure the API is running and the dev server proxies <code className="bg-neutral-100 px-1">/api</code> to your
+          backend (see <code className="bg-neutral-100 px-1">vite.config.ts</code>).
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-32 pb-24 px-10 max-w-screen-2xl mx-auto">

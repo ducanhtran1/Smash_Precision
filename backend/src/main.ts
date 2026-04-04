@@ -1,19 +1,29 @@
+import { RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { getCorsOrigins } from './cors-origins';
+import { RedisIoAdapter } from './redis-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const redisAdapter = new RedisIoAdapter(app);
+  await redisAdapter.connectToRedis();
+  if (process.env.REDIS_URL?.trim()) {
+    app.useWebSocketAdapter(redisAdapter);
+  }
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://localhost:4173',
-      'http://127.0.0.1:4173',
-    ],
+    origin: getCorsOrigins(),
     credentials: true,
   });
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: [
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'health/ready', method: RequestMethod.GET },
+    ],
+  });
 
   // Swagger Configuration
   const config = new DocumentBuilder()

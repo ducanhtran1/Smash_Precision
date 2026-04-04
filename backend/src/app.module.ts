@@ -12,6 +12,7 @@ import { Product } from './products/entities/product.entity';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { EventsModule } from './events/events.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EventsModule } from './events/events.module';
     OrdersModule,
     AuthModule,
     EventsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

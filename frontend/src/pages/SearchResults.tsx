@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { products } from '../data/products';
+import { useProducts } from '../contexts/ProductsContext';
 import { Link } from 'react-router-dom';
 import { Search as SearchIcon } from 'lucide-react';
 
 const SearchResults = () => {
   const [query, setQuery] = useState('');
+  const { products, loading } = useProducts();
   
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(query.toLowerCase()) || 
     p.category.toLowerCase().includes(query.toLowerCase()) ||
-    p.description.toLowerCase().includes(query.toLowerCase())
+    (p.description && p.description.toLowerCase().includes(query.toLowerCase()))
   );
+
+  if (loading) return <div className="pt-40 px-10 text-center uppercase tracking-widest text-[10px]">Loading Interface...</div>;
 
   return (
     <main className="pt-32 pb-24 px-10 max-w-screen-2xl mx-auto min-h-screen">

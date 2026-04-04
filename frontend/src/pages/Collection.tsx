@@ -1,13 +1,16 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { products } from '../data/products';
+import { useProducts } from '../contexts/ProductsContext';
 
 const Collection = () => {
   const { category } = useParams<{ category: string }>();
+  const { products, loading } = useProducts();
   
   const filteredProducts = category === 'all' 
     ? products 
     : products.filter(p => p.category.toLowerCase() === category);
+
+  if (loading) return <div className="pt-40 px-10 text-center uppercase tracking-widest text-[10px]">Loading Archive...</div>;
 
   return (
     <div className="pt-32 pb-24 px-10 max-w-screen-2xl mx-auto">

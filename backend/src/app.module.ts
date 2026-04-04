@@ -11,6 +11,7 @@ import { User } from './users/entities/user.entity';
 import { Product } from './products/entities/product.entity';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
     ProductsModule,
     OrdersModule,
     AuthModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

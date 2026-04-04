@@ -30,6 +30,9 @@ export class Product {
   @Column({ nullable: true })
   subCategory: string;
 
+  @Column({ default: 100 })
+  stock: number;
+
   @OneToMany(() => OrderItem, orderItem => orderItem.product)
   orderItems: OrderItem[];
 

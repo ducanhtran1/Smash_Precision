@@ -10,29 +10,32 @@ export class Order {
   @ManyToOne(() => User, user => user.orders)
   user: User;
 
-  @Column('float')
+  @Column('float', { nullable: true })
   total: number;
 
-  @Column()
+  @Column({ default: 'PENDING' })
   status: string;
 
-  @Column()
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
 
-  @Column()
+  @Column({ nullable: true })
   street: string;
 
-  @Column()
+  @Column({ nullable: true })
   city: string;
 
-  @Column()
+  @Column({ nullable: true })
   zip: string;
 
   @OneToMany(() => OrderItem, orderItem => orderItem.order, { cascade: true })
   items: OrderItem[];
+
+  @Column('float')
+  totalAmount: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,15 +1,17 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { products } from '../data/products';
+import { useProducts } from '../contexts/ProductsContext';
 import { useCart } from '../contexts/CartContext';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { products, loading } = useProducts();
   
   const product = products.find(p => p.id === id);
 
+  if (loading) return <div className="pt-40 px-10 text-center uppercase tracking-widest text-[10px]">Loading Item Specs...</div>;
   if (!product) return <div className="pt-40 px-10">Product not found.</div>;
 
   return (

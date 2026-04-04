@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { useAuth } from '../contexts/AuthContext';
-import { Product } from '../types';
-import { products } from '../data/products';
-import { handleFirestoreError, OperationType } from '../lib/error-handler';
+import { db } from '@/src/lib/firebase';
+import { useAuth } from '@/src/contexts/AuthContext';
+import { Product } from '@/src/types';
+import { products } from '@/src/data/products';
+import { handleFirestoreError, OperationType } from '@/src/lib/error-handler';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 

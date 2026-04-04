@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProducts } from '../contexts/ProductsContext';
+import { useProducts } from '@/src/contexts/ProductsContext';
 import { Link } from 'react-router-dom';
 import { Search as SearchIcon } from 'lucide-react';
 

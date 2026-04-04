@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { useAuth } from '../contexts/AuthContext';
-import { Order } from '../types';
-import { handleFirestoreError, OperationType } from '../lib/error-handler';
+import { db } from '@/src/lib/firebase';
+import { useAuth } from '@/src/contexts/AuthContext';
+import { Order } from '@/src/types';
+import { handleFirestoreError, OperationType } from '@/src/lib/error-handler';
 import { ArrowRight, Package } from 'lucide-react';
 
 const Dashboard = () => {

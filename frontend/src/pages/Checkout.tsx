@@ -1,27 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { useAuth } from '../contexts/AuthContext';
-import { useCart } from '../contexts/CartContext';
-import { handleFirestoreError, OperationType } from '../lib/error-handler';
+import { useAuth } from '@/src/contexts/AuthContext';
+import { useCart } from '@/src/contexts/CartContext';
+import { useProducts } from '@/src/contexts/ProductsContext';
 import { CreditCard, Wallet, Verified } from 'lucide-react';
 
 const Checkout = () => {
   const { user } = useAuth();
   const { items, total, clearCart } = useCart();
+  const { refreshProducts } = useProducts();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [address, setAddress] = useState({
     firstName: '',
     lastName: '',
     street: '',
     city: '',
-    zip: ''
+    zip: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     if (!user) {
       navigate('/login');
       return;
@@ -30,21 +31,37 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      const orderData = {
-        userId: user.uid,
-        items,
-        total,
-        status: 'Order Received',
-        createdAt: new Date().toISOString(),
-        shippingAddress: address,
-        timestamp: serverTimestamp()
-      };
+      const base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? '';
+      const url = base ? `${base}/api/orders` : '/api/orders';
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firebaseUid: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName ?? undefined,
+          productIds: items.map((i) => i.productId),
+          quantities: items.map((i) => i.quantity),
+          firstName: address.firstName,
+          lastName: address.lastName,
+          street: address.street,
+          city: address.city,
+          zip: address.zip,
+        }),
+      });
 
-      const docRef = await addDoc(collection(db, 'orders'), orderData);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Order failed (${res.status})`);
+      }
+
+      const order = (await res.json()) as { id: string };
       clearCart();
-      navigate(`/confirmation/${docRef.id}`);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'orders');
+      await refreshProducts();
+      navigate(`/confirmation/${order.id}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Order failed';
+      setSubmitError(message);
     } finally {
       setLoading(false);
     }
@@ -95,55 +112,55 @@ const Checkout = () => {
             <div className="mb-10">
               <h2 className="font-sans text-[11px] tracking-[0.2em] uppercase font-bold">02. Shipping Logistics</h2>
             </div>
-            <form className="grid grid-cols-2 gap-x-8 gap-y-12">
+            <form id="checkout-form" className="grid grid-cols-2 gap-x-8 gap-y-12" onSubmit={handleSubmit}>
               <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
                 <label className="text-[10px] uppercase tracking-widest text-neutral-400">First Name</label>
-                <input 
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300" 
-                  placeholder="JULIAN" 
+                <input
+                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+                  placeholder="JULIAN"
                   type="text"
                   value={address.firstName}
-                  onChange={(e) => setAddress({...address, firstName: e.target.value})}
+                  onChange={(e) => setAddress({ ...address, firstName: e.target.value })}
                 />
               </div>
               <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
                 <label className="text-[10px] uppercase tracking-widest text-neutral-400">Last Name</label>
-                <input 
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300" 
-                  placeholder="VANCE" 
+                <input
+                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+                  placeholder="VANCE"
                   type="text"
                   value={address.lastName}
-                  onChange={(e) => setAddress({...address, lastName: e.target.value})}
+                  onChange={(e) => setAddress({ ...address, lastName: e.target.value })}
                 />
               </div>
               <div className="col-span-2 flex flex-col gap-2">
                 <label className="text-[10px] uppercase tracking-widest text-neutral-400">Street Address</label>
-                <input 
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300" 
-                  placeholder="1248 PRECISION WAY" 
+                <input
+                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+                  placeholder="1248 PRECISION WAY"
                   type="text"
                   value={address.street}
-                  onChange={(e) => setAddress({...address, street: e.target.value})}
+                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
                 />
               </div>
               <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
                 <label className="text-[10px] uppercase tracking-widest text-neutral-400">City</label>
-                <input 
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300" 
-                  placeholder="LOS ANGELES" 
+                <input
+                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+                  placeholder="LOS ANGELES"
                   type="text"
                   value={address.city}
-                  onChange={(e) => setAddress({...address, city: e.target.value})}
+                  onChange={(e) => setAddress({ ...address, city: e.target.value })}
                 />
               </div>
               <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
                 <label className="text-[10px] uppercase tracking-widest text-neutral-400">Postal Code</label>
-                <input 
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300" 
-                  placeholder="90001" 
+                <input
+                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+                  placeholder="90001"
                   type="text"
                   value={address.zip}
-                  onChange={(e) => setAddress({...address, zip: e.target.value})}
+                  onChange={(e) => setAddress({ ...address, zip: e.target.value })}
                 />
               </div>
             </form>
@@ -168,16 +185,20 @@ const Checkout = () => {
               <span className="text-xl font-bold uppercase tracking-tighter">Total</span>
               <span className="text-4xl font-black tracking-tighter">${total.toFixed(2)}</span>
             </div>
+            {submitError && (
+              <p className="text-xs text-red-600 leading-relaxed">{submitError}</p>
+            )}
             <div className="space-y-4 pt-10">
-              <button 
-                onClick={handleSubmit}
+              <button
+                type="submit"
+                form="checkout-form"
                 disabled={loading || items.length === 0}
                 className="w-full bg-black text-white py-6 font-bold uppercase tracking-[0.2em] text-xs hover:bg-neutral-800 transition-all disabled:opacity-50"
               >
                 {loading ? 'PROCESSING...' : 'Complete Purchase'}
               </button>
               <p className="text-[9px] text-center text-neutral-400 uppercase tracking-widest leading-relaxed">
-                By clicking "Complete Purchase", you agree to our terms of engineering and shipping protocols.
+                By clicking &quot;Complete Purchase&quot;, you agree to our terms of engineering and shipping protocols.
               </p>
             </div>
             <div className="pt-20">

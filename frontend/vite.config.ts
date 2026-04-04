@@ -26,5 +26,14 @@ export default defineConfig(({mode}) => {
         },
       },
     },
+    // Same proxy for `vite preview` so /api works after `vite build`
+    preview: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+        },
+      },
+    },
   };
 });

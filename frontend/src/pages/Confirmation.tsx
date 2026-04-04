@@ -1,9 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { Order } from '../types';
-import { handleFirestoreError, OperationType } from '../lib/error-handler';
+import { db } from '@/src/lib/firebase';
+import { Order } from '@/src/types';
+import { handleFirestoreError, OperationType } from '@/src/lib/error-handler';
+
+/** Map Nest order (with nested product) to the flat item shape the UI expects */
+function orderFromApiPayload(data: {
+  id: string;
+  status?: string;
+  items?: Array<{
+    quantity: number;
+    priceAtPurchase: number;
+    product?: { id: string; name: string; imageUrl: string };
+  }>;
+}): Order {
+  const items =
+    data.items?.map((it) => ({
+      productId: it.product?.id ?? '',
+      productName: it.product?.name ?? 'Product',
+      quantity: it.quantity,
+      priceAtPurchase: it.priceAtPurchase,
+      imageUrl: it.product?.imageUrl ?? '',
+    })) ?? [];
+
+  return {
+    id: data.id,
+    userId: '',
+    items,
+    total: 0,
+    status: 'Order Received',
+    createdAt: new Date().toISOString(),
+    shippingAddress: {
+      firstName: '',
+      lastName: '',
+      street: '',
+      city: '',
+      zip: '',
+    },
+  };
+}
 
 const Confirmation = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -13,16 +49,32 @@ const Confirmation = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       if (!orderId) return;
+      const base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? '';
+      const primary = base ? `${base}/api/orders/${orderId}` : `/api/orders/${orderId}`;
+
+      let loaded = false;
       try {
-        const docSnap = await getDoc(doc(db, 'orders', orderId));
-        if (docSnap.exists()) {
-          setOrder({ id: docSnap.id, ...docSnap.data() } as Order);
+        const res = await fetch(primary, { cache: 'no-store' });
+        if (res.ok) {
+          const data = (await res.json()) as Parameters<typeof orderFromApiPayload>[0];
+          setOrder(orderFromApiPayload(data));
+          loaded = true;
         }
-      } catch (error) {
-        handleFirestoreError(error, OperationType.GET, `orders/${orderId}`);
-      } finally {
-        setLoading(false);
+      } catch {
+        /* try Firestore */
       }
+
+      if (!loaded) {
+        try {
+          const docSnap = await getDoc(doc(db, 'orders', orderId));
+          if (docSnap.exists()) {
+            setOrder({ id: docSnap.id, ...docSnap.data() } as Order);
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.GET, `orders/${orderId}`);
+        }
+      }
+      setLoading(false);
     };
     fetchOrder();
   }, [orderId]);
@@ -68,14 +120,16 @@ const Confirmation = () => {
 
             <div className="space-y-12">
               {order.items.map((item) => (
-                <div key={item.productId} className="flex gap-8 items-start">
+                <div key={`${item.productId}-${item.productName}`} className="flex gap-8 items-start">
                   <div className="w-32 h-40 bg-neutral-50 flex-shrink-0 overflow-hidden group">
                     <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale" src={item.imageUrl} alt={item.productName} />
                   </div>
                   <div className="flex-grow py-2">
                     <div className="flex justify-between items-start mb-1">
                       <h3 className="text-lg font-bold tracking-tight uppercase">{item.productName}</h3>
-                      <span className="text-body-md font-medium">${item.priceAtPurchase.toFixed(2)}</span>
+                      <span className="text-body-md font-medium">
+                        ${(item.priceAtPurchase * item.quantity).toFixed(2)}
+                      </span>
                     </div>
                     <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase mb-4">ENGINEERED COMPONENT</p>
                     <div className="flex gap-4">

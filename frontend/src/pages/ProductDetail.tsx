@@ -1,15 +1,19 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useProducts } from '../contexts/ProductsContext';
-import { useCart } from '../contexts/CartContext';
+import { useProducts } from '@/src/contexts/ProductsContext';
+import { useCart } from '@/src/contexts/CartContext';
+import { normalizeProductSpecs } from '@/src/lib/utils';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { products, loading } = useProducts();
-  
+
   const product = products.find(p => p.id === id);
+  const stock = typeof product?.stock === 'number' ? product.stock : 0;
+  const specsRows = product ? normalizeProductSpecs(product.specs) : {};
+  const outOfStock = stock <= 0;
 
   if (loading) return <div className="pt-40 px-10 text-center uppercase tracking-widest text-[10px]">Loading Item Specs...</div>;
   if (!product) return <div className="pt-40 px-10">Product not found.</div>;
@@ -56,17 +60,30 @@ const ProductDetail = () => {
               <p className="text-xl font-light text-neutral-600 max-w-md leading-relaxed">
                 {product.description}
               </p>
+              <p className="font-sans text-sm text-neutral-800">
+                {outOfStock ? (
+                  <span className="text-neutral-500">Out of stock</span>
+                ) : (
+                  <>
+                    <span className="font-semibold">{stock}</span>
+                    <span className="text-neutral-500"> in stock</span>
+                  </>
+                )}
+              </p>
             </header>
 
             <div className="flex flex-col gap-4">
-              <button 
+              <button
+                type="button"
+                disabled={outOfStock}
                 onClick={() => {
+                  if (outOfStock) return;
                   addToCart(product);
                   navigate('/checkout');
                 }}
-                className="bg-black text-white py-4 px-12 text-[12px] font-bold tracking-[0.1em] hover:bg-neutral-800 transition-all"
+                className="bg-black text-white py-4 px-12 text-[12px] font-bold tracking-[0.1em] hover:bg-neutral-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                ADD TO BAG
+                {outOfStock ? 'OUT OF STOCK' : 'ADD TO BAG'}
               </button>
               <button className="border border-neutral-200 text-black py-4 px-12 text-[12px] font-bold tracking-[0.1em] hover:bg-neutral-50 transition-all">
                 FIND YOUR SPEC
@@ -77,12 +94,16 @@ const ProductDetail = () => {
             <section className="pt-12 border-t border-neutral-100">
               <h3 className="font-sans text-[11px] tracking-[0.2em] uppercase font-bold mb-8">TECHNICAL DATA</h3>
               <div className="space-y-4">
-                {Object.entries(product.specs).map(([key, value]) => (
-                  <div key={key} className="flex justify-between items-baseline py-2 border-b border-neutral-50">
-                    <span className="text-[10px] tracking-widest uppercase text-neutral-500">{key}</span>
-                    <span className="text-sm font-medium">{value}</span>
-                  </div>
-                ))}
+                {Object.keys(specsRows).length === 0 ? (
+                  <p className="text-sm text-neutral-400">No technical specifications listed.</p>
+                ) : (
+                  Object.entries(specsRows).map(([key, value]) => (
+                    <div key={key} className="flex justify-between items-baseline py-2 border-b border-neutral-50">
+                      <span className="text-[10px] tracking-widest uppercase text-neutral-500">{key}</span>
+                      <span className="text-sm font-medium">{value}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithGoogle } from '../lib/firebase';
-import { useAuth } from '../contexts/AuthContext';
+import { signInWithGoogle } from '@/src/lib/firebase';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();

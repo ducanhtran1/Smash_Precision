@@ -14,22 +14,27 @@ const OrderHistory = () => {
   useEffect(() => {
     if (!user) return;
 
-    const q = query(
-      collection(db, 'orders'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        
+        const response = await fetch(`${API_URL}/api/orders/user/${user.uid || user.id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        
+        if (response.ok) {
+          const ordersData = await response.json();
+          setOrders(ordersData);
+        }
+      } catch (error) {
+        console.error("Failed to load orders");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-      setOrders(ordersData);
-      setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'orders');
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    fetchOrders();
   }, [user]);
 
   return (

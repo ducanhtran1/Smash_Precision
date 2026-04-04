@@ -3,9 +3,17 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateUserDto {
   @ApiProperty({
     example: 'firebase-uid-123',
+    required: false,
     description: 'The unique Firebase ID',
   })
-  firebaseUid: string;
+  firebaseUid?: string;
+
+  @ApiProperty({
+    example: 'strongpassword123',
+    required: false,
+    description: 'The user password for local login',
+  })
+  password?: string;
 
   @ApiProperty({
     example: 'user@example.com',

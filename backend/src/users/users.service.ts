@@ -24,6 +24,10 @@ export class UsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+  async findByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
   async findByFirebaseUid(firebaseUid: string) {
     return this.userRepository.findOne({ where: { firebaseUid } });
   }

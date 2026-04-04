@@ -6,7 +6,7 @@ export default function ProductCard({ product }) {
 
   useEffect(() => {
     // 1. Connect to your NestJS backend WebSocket server
-    const socket = io('http://localhost:3000'); // Use your actual backend URL
+    const socket = io(import.meta.env.VITE_API_URL || '');
 
     // 2. Listen for the specific 'stock_updated' event
     socket.on('stock_updated', (data) => {

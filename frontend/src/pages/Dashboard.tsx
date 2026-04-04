@@ -18,21 +18,26 @@ const Dashboard = () => {
       return;
     }
 
-    const q = query(
-      collection(db, 'orders'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(3)
-    );
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        
+        // Either use the token or Firebase ID token depending on which auth they chose
+        const response = await fetch(`${API_URL}/api/orders/user/${user.uid || user.id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        
+        if (response.ok) {
+          const orders = await response.json();
+          setRecentOrders(orders);
+        }
+      } catch (error) {
+        console.error("Failed to load orders");
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-      setRecentOrders(orders);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'orders');
-    });
-
-    return () => unsubscribe();
+    fetchOrders();
   }, [user, navigate]);
 
   if (!user) return null;

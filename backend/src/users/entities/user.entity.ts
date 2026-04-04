@@ -13,8 +13,11 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   firebaseUid: string;
+
+  @Column({ nullable: true })
+  password?: string;
 
   @Column({ unique: true })
   email: string;

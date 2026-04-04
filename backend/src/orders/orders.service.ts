@@ -38,6 +38,14 @@ export class OrdersService {
     });
   }
 
+  async findByUserId(userId: string) {
+    return this.orderRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user', 'items', 'items.product'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async updateStatus(id: string, status: string) {
     const order = await this.findById(id);
     if (!order) throw new NotFoundException('Order not found');

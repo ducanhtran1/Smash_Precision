@@ -8,8 +8,8 @@ export default function ProductCard({ product }) {
     // 1. Connect to your NestJS backend WebSocket server
     const socket = io(import.meta.env.VITE_API_URL || '');
 
-    // 2. Listen for the specific 'stock_updated' event
-    socket.on('stock_updated', (data) => {
+    // 2. Listen for the specific 'stock_update' event
+    socket.on('stock_update', (data) => {
       // Check if the update is for THIS specific product
       if (data.productId === product.id) {
         setCurrentStock(data.stock); // Instantly updates the UI!

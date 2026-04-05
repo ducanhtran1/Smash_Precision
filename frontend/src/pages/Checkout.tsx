@@ -53,7 +53,12 @@ const Checkout = () => {
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || `Order failed (${res.status})`);
+        try {
+          const json = JSON.parse(text);
+          throw new Error(json.message || `Order failed (${res.status})`);
+        } catch {
+          throw new Error(text || `Order failed (${res.status})`);
+        }
       }
 
       const order = (await res.json()) as { id: string };

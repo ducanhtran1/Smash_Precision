@@ -46,7 +46,7 @@ const OrderHistory = () => {
           <span className="font-sans text-[10px] tracking-[0.1em] uppercase text-black font-bold">Orders</span>
         </div>
         <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-2">Order History</h1>
-        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-neutral-400">Viewing all transactions for user ID: {user?.uid.slice(0, 8)}</p>
+        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-neutral-400">Viewing all transactions for user ID: {(user?.uid || user?.id || '').slice(0, 8)}</p>
       </header>
 
       <div className="space-y-12">

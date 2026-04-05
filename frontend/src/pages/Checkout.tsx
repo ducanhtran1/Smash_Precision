@@ -38,6 +38,7 @@ const Checkout = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           firebaseUid: user.uid,
+          userId: user.id,
           email: user.email ?? '',
           displayName: user.displayName ?? undefined,
           productIds: items.map((i) => i.productId),

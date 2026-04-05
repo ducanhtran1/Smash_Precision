@@ -96,6 +96,6 @@ jobs:
         # This will upload just the backend to your Railway project
         run: |
           cd backend
-          railway up --service backend --detach
+          railway up --service Smash_Precision --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

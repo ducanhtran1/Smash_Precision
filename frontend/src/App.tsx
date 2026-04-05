@@ -12,6 +12,7 @@ import { cn } from './lib/utils';
 import Home from './pages/Home';
 import Collection from './pages/Collection';
 import ProductDetail from './pages/ProductDetail';
+import { Toaster } from 'react-hot-toast';
 import SearchResults from './pages/SearchResults';
 import Account from './pages/Account';
 import Dashboard from './pages/Dashboard';
@@ -146,6 +147,21 @@ export default function App() {
       <ProductsProvider>
         <CartProvider>
         <Router>
+          <Toaster 
+            position="bottom-center"
+            toastOptions={{
+              style: {
+                borderRadius: '0px',
+                background: '#000',
+                color: '#fff',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontWeight: 'bold',
+                padding: '16px 24px',
+              },
+            }}
+          />
           <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
             <Navbar />
             <main className="min-h-screen">

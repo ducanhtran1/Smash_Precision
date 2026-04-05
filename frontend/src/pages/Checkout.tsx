@@ -4,14 +4,14 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { useCart } from '@/src/contexts/CartContext';
 import { useProducts } from '@/src/contexts/ProductsContext';
 import { CreditCard, Wallet, Verified } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Checkout = () => {
   const { user } = useAuth();
-  const { items, total, clearCart, removeFromCart } = useCart();
+  const { items, total, clearCart, removeFromCart, updateQuantity } = useCart();
   const { refreshProducts } = useProducts();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [address, setAddress] = useState({
     firstName: '',
     lastName: '',
@@ -22,7 +22,6 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(null);
     if (!user) {
       navigate('/login');
       return;
@@ -67,7 +66,7 @@ const Checkout = () => {
       navigate(`/confirmation/${order.id}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Order failed';
-      setSubmitError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -101,14 +100,28 @@ const Checkout = () => {
                         <span className="text-xl font-medium">${item.priceAtPurchase.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between items-end mt-4">
-                        <p className="text-[11px] uppercase tracking-widest text-neutral-400">Qty: {item.quantity}</p>
-                        <button 
-                          onClick={() => removeFromCart(item.productId)}
-                          type="button"
-                          className="text-[10px] uppercase tracking-widest text-neutral-400 hover:text-black transition-colors underline decoration-neutral-300 underline-offset-4"
-                        >
-                          Remove
-                        </button>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center border border-neutral-200">
+                            <button 
+                              type="button"
+                              onClick={() => updateQuantity(item.productId, -1)}
+                              className="px-3 py-1 text-neutral-500 hover:bg-neutral-50 transition-colors"
+                            >-</button>
+                            <span className="text-[11px] w-6 text-center">{item.quantity}</span>
+                            <button 
+                              type="button"
+                              onClick={() => updateQuantity(item.productId, 1)}
+                              className="px-3 py-1 text-neutral-500 hover:bg-neutral-50 transition-colors"
+                            >+</button>
+                          </div>
+                          <button 
+                            onClick={() => removeFromCart(item.productId)}
+                            type="button"
+                            className="text-[10px] uppercase tracking-widest text-neutral-400 hover:text-black transition-colors underline decoration-neutral-300 underline-offset-4"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -200,9 +213,6 @@ const Checkout = () => {
               <span className="text-xl font-bold uppercase tracking-tighter">Total</span>
               <span className="text-4xl font-black tracking-tighter">${total.toFixed(2)}</span>
             </div>
-            {submitError && (
-              <p className="text-xs text-red-600 leading-relaxed">{submitError}</p>
-            )}
             <div className="space-y-4 pt-10">
               <button
                 type="submit"

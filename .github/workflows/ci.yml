@@ -92,13 +92,10 @@ jobs:
       - name: Install Railway CLI
         run: npm i -g @railway/cli
 
-      - name: Deploy Frontend to Railway
-        # You must configure your RAILWAY_TOKEN in your Repo's GitHub Secrets.
-        run: railway up --service frontend --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
       - name: Deploy Backend to Railway
-        run: railway up --service backend --detach
+        # This will upload just the backend to your Railway project
+        run: |
+          cd backend
+          railway up --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

@@ -76,16 +76,7 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
-  async updateStock(productId: string, quantity: number) {
-    const product = await this.productRepository.findOne({
-      where: { id: productId },
-    });
-    if (!product) {
-      throw new Error('Product not found');
-    }
-    product.stock -= quantity;
-    return this.productRepository.save(product);
-  }
+
 
   async remove(id: string) {
     const product = await this.findById(id);

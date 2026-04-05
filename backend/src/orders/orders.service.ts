@@ -118,7 +118,7 @@ export class OrdersService {
 
         if (!product || product.stock < quantity) {
           throw new BadRequestException(
-            `Insufficient stock for product ${productId ?? ''}`,
+            `Insufficient stock for ${product?.name ?? 'selected item'}. Please remove it to proceed.`,
           );
         }
 

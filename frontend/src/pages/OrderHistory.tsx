@@ -63,11 +63,11 @@ const OrderHistory = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
               <div className="md:col-span-4 aspect-square bg-neutral-50 overflow-hidden">
-                <img className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" src={order.items[0].imageUrl} alt={order.items[0].productName} />
+                <img className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" src={order.items[0].product?.imageUrl || order.items[0].imageUrl} alt={order.items[0].product?.name || order.items[0].productName} />
               </div>
               <div className="md:col-span-5 space-y-4">
                 <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400">Contents ({order.items.length})</div>
-                <h3 className="text-2xl font-bold tracking-tighter uppercase">{order.items[0].productName} {order.items.length > 1 && `+ ${order.items.length - 1} more`}</h3>
+                <h3 className="text-2xl font-bold tracking-tighter uppercase">{order.items[0].product?.name || order.items[0].productName} {order.items.length > 1 && `+ ${order.items.length - 1} more`}</h3>
                 <p className="text-neutral-600 max-w-sm leading-relaxed">Precision engineered components for high-performance athletic pursuit.</p>
                 <div className="pt-4 flex items-center space-x-6">
                   <Link to={`/confirmation/${order.id}`} className="bg-black text-white px-8 py-3 font-sans text-[10px] tracking-[0.1em] uppercase hover:bg-neutral-800 transition-colors">Order Details</Link>
@@ -81,8 +81,8 @@ const OrderHistory = () => {
           </section>
         ))}
         {orders.length === 0 && !loading && (
-          <div className="py-40 text-center text-neutral-400 uppercase text-[10px] tracking-widest">
-            No transaction records found.
+          <div className="pt-12 pb-32 text-left text-neutral-400 uppercase text-[10px] tracking-widest border-t border-neutral-100">
+            No transaction records found in the database.
           </div>
         )}
       </div>

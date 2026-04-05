@@ -1,0 +1,74 @@
+name: Real-World CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # ==============================
+  # Job A: Frontend Validation
+  # ==============================
+  frontend:
+    name: Validate Frontend (React/Vite)
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        cache-dependency-path: ./frontend/yarn.lock
+
+    - name: Install Frontend Dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Compile TypeScript (Typecheck)
+      run: yarn lint
+      
+    - name: Production Build Verification
+      run: yarn build
+      env:
+        # Provide fallback env vars so build doesn't crash on missing variables
+        VITE_API_URL: http://localhost:3001
+
+  # ==============================
+  # Job B: Backend Validation
+  # ==============================
+  backend:
+    name: Validate Backend (NestJS)
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        cache-dependency-path: ./backend/yarn.lock
+
+    - name: Install Backend Dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Run ESLint Code Quality Checks
+      # Remove --fix during CI so it fails on warnings/errors instead of trying to fix them silently
+      run: yarn eslint "{src,apps,libs,test}/**/*.ts"
+
+    - name: Production Build Verification
+      run: yarn build

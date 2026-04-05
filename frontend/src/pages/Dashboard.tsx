@@ -91,11 +91,11 @@ const Dashboard = () => {
                 <div key={order.id} className="bg-white py-8 flex flex-col md:flex-row md:items-center justify-between group transition-colors hover:bg-neutral-50 px-4">
                   <div className="flex items-center gap-6 mb-4 md:mb-0">
                     <div className="w-16 h-16 bg-neutral-50 overflow-hidden">
-                      <img className="w-full h-full object-cover grayscale" src={order.items[0].imageUrl} alt={order.items[0].productName} />
+                      <img className="w-full h-full object-cover grayscale" src={order.items[0].product?.imageUrl || order.items[0].imageUrl} alt={order.items[0].product?.name || order.items[0].productName} />
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold tracking-tight uppercase">{order.items[0].productName}</h3>
-                      <p className="text-[11px] text-neutral-400 tracking-wider uppercase">Order #{order.id.slice(0, 8)}</p>
+                    <div className="md:col-span-2 flex flex-col justify-center">
+                      <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400 mb-2">Order items ({order.items.length})</div>
+                      <h4 className="text-xl font-bold tracking-tight uppercase line-clamp-1">{order.items[0].product?.name || order.items[0].productName} {order.items.length > 1 && `+ ${order.items.length - 1} more`}</h4>
                     </div>
                   </div>
                   <div className="flex items-center justify-between md:justify-end gap-12">

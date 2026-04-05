@@ -76,8 +76,6 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
-
-
   async remove(id: string) {
     const product = await this.findById(id);
     if (!product) throw new NotFoundException('Product not found');

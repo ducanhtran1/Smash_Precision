@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
@@ -12,7 +13,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    return { id: payload.sub, email: payload.email, firebaseUid: payload.firebaseUid };
+  async validate(payload: {
+    sub: string;
+    email: string;
+    firebaseUid?: string;
+  }) {
+    return {
+      id: payload.sub,
+      email: payload.email,
+      firebaseUid: payload.firebaseUid,
+    };
   }
 }

@@ -39,11 +39,14 @@ export class OrdersService {
   }
 
   async findByUserId(userId: string) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId);
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        userId,
+      );
 
     return this.orderRepository.find({
-      where: isUuid 
-        ? { user: { id: userId } } 
+      where: isUuid
+        ? { user: { id: userId } }
         : { user: { firebaseUid: userId } },
       relations: ['user', 'items', 'items.product'],
       order: { createdAt: 'DESC' },

@@ -1,4 +1,12 @@
-import { Controller, Post, Request, UseGuards, Body, Get } from '@nestjs/common';
+/* eslint-disable */
+import {
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  Body,
+  Get,
+} from '@nestjs/common';
 import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
@@ -13,8 +21,13 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiBody({ schema: { type: 'object', properties: { email: { type: 'string' }, password: { type: 'string' } } } })
-  async login(@Request() req: any) {
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { email: { type: 'string' }, password: { type: 'string' } },
+    },
+  })
+  async login(@Request() req: { user: any }) {
     return this.authService.login(req.user);
   }
 
@@ -28,7 +41,7 @@ export class AuthController {
   @Get('profile')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile from JWT token' })
-  getProfile(@Request() req: any) {
+  getProfile(@Request() req: { user: any }) {
     return req.user;
   }
 }

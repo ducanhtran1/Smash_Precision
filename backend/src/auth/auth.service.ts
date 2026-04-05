@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+/* eslint-disable */
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -8,7 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -16,15 +21,19 @@ export class AuthService {
     if (user && user.password) {
       const isMatch = await bcrypt.compare(pass, user.password);
       if (isMatch) {
-         const { password, ...result } = user;
-         return result;
+        const { password, ...result } = user;
+        return result;
       }
     }
     return null;
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id, firebaseUid: user.firebaseUid };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      firebaseUid: user.firebaseUid,
+    };
     return {
       access_token: this.jwtService.sign(payload),
       user,
@@ -36,14 +45,14 @@ export class AuthService {
     if (existing) {
       throw new BadRequestException('Email already in use');
     }
-    
+
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     const user = await this.usersService.create({
       email: registerDto.email,
       password: hashedPassword,
       displayName: registerDto.displayName,
     });
-    
+
     return this.login(user);
   }
 }

@@ -2,6 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { OrdersService } from './orders.service';
 import { InventoryGateway } from '../events/inventory.gateway';
+import { RedisService } from '../redis/redis.service';
 import { Logger } from '@nestjs/common';
 
 @Processor('orders')
@@ -11,6 +12,7 @@ export class OrdersProcessor extends WorkerHost {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly inventoryGateway: InventoryGateway,
+    private readonly redisService: RedisService,
   ) {
     super();
   }
@@ -34,6 +36,15 @@ export class OrdersProcessor extends WorkerHost {
       return order;
     } catch (error: any) {
       this.logger.error(`Order job ${queueId} failed: ${error.message}`);
+      
+      // FATAL WORKER CRASH: Provide an automatic reimbursement to the RAM stock limits.
+      try {
+        for (let i = 0; i < job.data.productIds.length; i++) {
+          await this.redisService.incrementStock(job.data.productIds[i], job.data.quantities[i]);
+        }
+      } catch (err: any) {
+        this.logger.error(`Failed to restock Redis during rollback: ${err.message}`);
+      }
       
       // 3. Transmit the database failure (e.g., Not enough stock) over WebSocket
       this.inventoryGateway.server.emit(`order_status_${queueId}`, { 

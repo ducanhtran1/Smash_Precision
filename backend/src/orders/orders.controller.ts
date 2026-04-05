@@ -7,10 +7,12 @@ import {
   Param,
   Post,
   HttpCode,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { OrdersService } from './orders.service';
+import { RedisService } from '../redis/redis.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -21,6 +23,7 @@ export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
     @InjectQueue('orders') private readonly ordersQueue: Queue,
+    private readonly redisService: RedisService,
   ) {}
 
   @Get()
@@ -52,8 +55,21 @@ export class OrdersController {
   })
   @ApiResponse({ status: 202, description: 'Order successfully queued' })
   async createOrder(@Body() createOrderDto: CreateOrderDto) {
+    // Phase 1: High-concurrency Sub-millisecond verification
+    // Atomically checks if the entire cart requested is in stock and deducts it simultaneously.
+    const isStockAvailable = await this.redisService.decrementStock(
+      createOrderDto.productIds,
+      createOrderDto.quantities,
+    );
+
+    if (!isStockAvailable) {
+      throw new BadRequestException('Insufficient stock for one or more requested items.');
+    }
+
+    // Phase 2: Add into Postgres Queue processing
     const queueId = Date.now().toString() + '-' + Math.floor(Math.random() * 10000);
     await this.ordersQueue.add('process-order', { ...createOrderDto, queueId });
+    
     return { status: 'queued', message: 'Order placed in queue', queueId };
   }
 

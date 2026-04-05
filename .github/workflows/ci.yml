@@ -72,3 +72,33 @@ jobs:
 
     - name: Production Build Verification
       run: yarn build
+
+  # ==============================
+  # Job C: Production Deployment
+  # ==============================
+  deploy:
+    name: Deploy to Production
+    # This ensures Deploy only runs if Frontend and Backend successfully compiled
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    
+    # THE MAGIC: It specifically scans your git commit message!
+    if: contains(github.event.head_commit.message, 'deploy prod')
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy Frontend to Railway
+        # You must configure your RAILWAY_TOKEN in your Repo's GitHub Secrets.
+        run: railway up --service frontend --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deploy Backend to Railway
+        run: railway up --service backend --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

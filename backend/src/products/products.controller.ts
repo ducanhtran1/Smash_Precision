@@ -10,6 +10,7 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { CloudinaryService } from '@/store/cloudinary/cloudinary.service';
@@ -35,6 +36,8 @@ export class ProductsController {
   @Get()
   @ApiOperation({ summary: 'Get all products' })
   @ApiResponse({ status: 200, description: 'Return all products' })
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('all_products')
   findAll() {
     return this.productService.findAll();
   }

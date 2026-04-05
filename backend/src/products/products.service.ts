@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { DeepPartial, In, Repository } from 'typeorm';
@@ -9,6 +11,8 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
   async findAll() {
@@ -29,7 +33,9 @@ export class ProductsService {
       ...productData,
       imageUrl: imageURL,
     });
-    return this.productRepository.save(newProduct);
+    const saved = await this.productRepository.save(newProduct);
+    await this.cacheManager.del('all_products');
+    return saved;
   }
 
   /**
@@ -73,12 +79,16 @@ export class ProductsService {
     if (productData.stock !== undefined) product.stock = productData.stock;
     if (imageURL) product.imageUrl = imageURL;
 
-    return this.productRepository.save(product);
+    const saved = await this.productRepository.save(product);
+    await this.cacheManager.del('all_products');
+    return saved;
   }
 
   async remove(id: string) {
     const product = await this.findById(id);
     if (!product) throw new NotFoundException('Product not found');
-    return this.productRepository.remove(product);
+    const removed = await this.productRepository.remove(product);
+    await this.cacheManager.del('all_products');
+    return removed;
   }
 }

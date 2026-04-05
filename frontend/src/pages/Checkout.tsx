@@ -7,7 +7,7 @@ import { CreditCard, Wallet, Verified } from 'lucide-react';
 
 const Checkout = () => {
   const { user } = useAuth();
-  const { items, total, clearCart } = useCart();
+  const { items, total, clearCart, removeFromCart } = useCart();
   const { refreshProducts } = useProducts();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -100,7 +100,16 @@ const Checkout = () => {
                         <h3 className="text-xl font-bold tracking-tight uppercase">{item.productName}</h3>
                         <span className="text-xl font-medium">${item.priceAtPurchase.toFixed(2)}</span>
                       </div>
-                      <p className="text-[11px] uppercase tracking-widest text-neutral-400 mt-2">Qty: {item.quantity}</p>
+                      <div className="flex justify-between items-end mt-4">
+                        <p className="text-[11px] uppercase tracking-widest text-neutral-400">Qty: {item.quantity}</p>
+                        <button 
+                          onClick={() => removeFromCart(item.productId)}
+                          type="button"
+                          className="text-[10px] uppercase tracking-widest text-neutral-400 hover:text-black transition-colors underline decoration-neutral-300 underline-offset-4"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

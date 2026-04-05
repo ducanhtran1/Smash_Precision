@@ -6,7 +6,10 @@ import {
   Delete,
   Param,
   Post,
+  HttpCode,
 } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { OrdersService } from './orders.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -15,7 +18,10 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    @InjectQueue('orders') private readonly ordersQueue: Queue,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all orders' })
@@ -39,13 +45,16 @@ export class OrdersController {
   }
 
   @Post()
+  @HttpCode(202)
   @ApiOperation({
-    summary: 'Create a new order',
-    description: 'Automatically charges stock and emits a WebSocket event',
+    summary: 'Enqueue a new order',
+    description: 'Places the order into a background processing queue',
   })
-  @ApiResponse({ status: 201, description: 'Order successfully created' })
-  createOrder(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.createOrder(createOrderDto);
+  @ApiResponse({ status: 202, description: 'Order successfully queued' })
+  async createOrder(@Body() createOrderDto: CreateOrderDto) {
+    const queueId = Date.now().toString() + '-' + Math.floor(Math.random() * 10000);
+    await this.ordersQueue.add('process-order', { ...createOrderDto, queueId });
+    return { status: 'queued', message: 'Order placed in queue', queueId };
   }
 
   @Patch(':id')

@@ -5,6 +5,7 @@ import { useCart } from '@/src/contexts/CartContext';
 import { useProducts } from '@/src/contexts/ProductsContext';
 import { CreditCard, Wallet, Verified } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 const Checkout = () => {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ const Checkout = () => {
   const { refreshProducts } = useProducts();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [queued, setQueued] = useState(false);
   const [address, setAddress] = useState({
     firstName: '',
     lastName: '',
@@ -51,6 +53,7 @@ const Checkout = () => {
       });
 
       if (!res.ok) {
+        setLoading(false);
         const text = await res.text();
         let errorMsg = `Order failed (${res.status})`;
         try {
@@ -64,15 +67,41 @@ const Checkout = () => {
         throw new Error(errorMsg);
       }
 
-      const order = (await res.json()) as { id: string };
-      clearCart();
-      await refreshProducts();
-      navigate(`/confirmation/${order.id}`);
+      const response = await res.json() as { queueId?: string, id?: string };
+      
+      if (response.queueId) {
+        setQueued(true);
+        const socketURL = base || '/';
+        const socket = io(socketURL);
+        
+        socket.on(`order_status_${response.queueId}`, async (data: any) => {
+          if (data.status === 'success') {
+            socket.disconnect();
+            clearCart();
+            await refreshProducts();
+            navigate(`/confirmation/${data.orderId}`);
+          } else {
+            socket.disconnect();
+            toast.error(data.message || 'Order failed during processing.');
+            setQueued(false);
+            setLoading(false);
+          }
+        });
+        
+        return; // Purposefully bypassing the 'finally' setLoading(false)
+      }
+
+      if (response.id) {
+        clearCart();
+        await refreshProducts();
+        navigate(`/confirmation/${response.id}`);
+        setLoading(false);
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Order failed';
       toast.error(message);
-    } finally {
       setLoading(false);
+      setQueued(false);
     }
   };
 
@@ -224,7 +253,7 @@ const Checkout = () => {
                 disabled={loading || items.length === 0}
                 className="w-full bg-black text-white py-6 font-bold uppercase tracking-[0.2em] text-xs hover:bg-neutral-800 transition-all disabled:opacity-50"
               >
-                {loading ? 'PROCESSING...' : 'Complete Purchase'}
+                {queued ? 'PROCESSING YOUR ORDER IN LINE...' : loading ? 'PROCESSING...' : 'Complete Purchase'}
               </button>
               <p className="text-[9px] text-center text-neutral-400 uppercase tracking-widest leading-relaxed">
                 By clicking &quot;Complete Purchase&quot;, you agree to our terms of engineering and shipping protocols.

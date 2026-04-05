@@ -32,7 +32,7 @@ import { HealthModule } from './health/health.module';
         }),
         ttl: 60000, // 60 seconds
       }),
-    }), 
+    }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

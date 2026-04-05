@@ -39,8 +39,10 @@ export class OrdersProcessor extends WorkerHost {
       });
 
       return order;
-    } catch (error: any) {
-      this.logger.error(`Order job ${queueId} failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Order job ${queueId} failed: ${errorMessage}`);
 
       // FATAL WORKER CRASH: Provide an automatic reimbursement to the RAM stock limits.
       try {
@@ -50,16 +52,17 @@ export class OrdersProcessor extends WorkerHost {
             job.data.quantities[i],
           );
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errMessage = err instanceof Error ? err.message : String(err);
         this.logger.error(
-          `Failed to restock Redis during rollback: ${err.message}`,
+          `Failed to restock Redis during rollback: ${errMessage}`,
         );
       }
 
       // 3. Transmit the database failure (e.g., Not enough stock) over WebSocket
       this.inventoryGateway.server.emit(`order_status_${queueId}`, {
         status: 'failed',
-        message: error.message || 'Transaction failed in processing',
+        message: errorMessage || 'Transaction failed in processing',
       });
 
       throw error;

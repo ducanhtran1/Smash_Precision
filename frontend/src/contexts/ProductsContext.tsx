@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
+import { io } from 'socket.io-client';
 import { Product } from '@/src/types';
 
 interface ProductsContextType {
@@ -81,7 +82,6 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetchProducts().catch(() => {});
   }, [fetchProducts]);
 
-  /** When you switch back from Swagger or another tab, reload the list (server changed, React state did not). */
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === 'visible') {
@@ -91,6 +91,21 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, [fetchProducts]);
+
+  // Global WebSocket listener for real-time stock sync across all components
+  useEffect(() => {
+    const socket = io(apiOrigin() || import.meta.env.VITE_API_URL || '');
+    socket.on('stock_update', (data: { productId: string; stock: number }) => {
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === data.productId ? { ...p, stock: data.stock } : p
+        )
+      );
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const refreshProducts = useCallback(async () => {
     await fetchProducts();

@@ -4,18 +4,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { User } from '@/users/entities/user.entity';
 import { ProductsService } from '@/products/products.service';
+import { Product } from '@/products/entities/product.entity';
 import { UsersService } from '@/users/users.service';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { OrderItem } from './entities/order-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
 export class OrdersService {
   constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     private readonly inventoryGateway: InventoryGateway,
     private readonly productService: ProductsService,
     private readonly userService: UsersService,
@@ -79,51 +82,62 @@ export class OrdersService {
       );
     }
 
-    const products = await this.productService.findByIds(productIds);
-    if (!products || products.length !== productIds.length) {
-      throw new BadRequestException('One or more products not found');
-    }
-
     const user: User = await this.resolveUser(dto);
 
-    let totalAmount = 0;
-    const lines: Array<{
-      productId: string;
-      quantity: number;
-      unitPrice: number;
-      stockAfter: number;
-    }> = [];
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    for (let i = 0; i < productIds.length; i++) {
-      const productId = productIds[i];
-      const quantity = quantities[i];
-      const product = products.find((p) => p.id === productId);
+    let savedOrderId: string | null = null;
+    const stockUpdates: Array<{ id: string; stockAfter: number }> = [];
 
-      if (!product || product.stock < quantity) {
-        throw new BadRequestException(
-          `Insufficient stock for product ${productId ?? ''}`,
-        );
+    try {
+      // 1. Lock Product Rows (Pessimistic Write)
+      const products = await queryRunner.manager
+        .createQueryBuilder(Product, 'product')
+        .setLock('pessimistic_write')
+        .whereInIds(productIds)
+        .getMany();
+
+      if (!products || products.length !== productIds.length) {
+        throw new BadRequestException('One or more products not found');
       }
 
-      const updated = await this.productService.updateStock(
-        product.id,
-        quantity,
-      );
+      let totalAmount = 0;
+      const lines: Array<{
+        productId: string;
+        quantity: number;
+        unitPrice: number;
+        stockAfter: number;
+      }> = [];
 
-      lines.push({
-        productId: updated.id,
-        quantity,
-        unitPrice: updated.price,
-        stockAfter: updated.stock,
-      });
-      totalAmount += updated.price * quantity;
+      for (let i = 0; i < productIds.length; i++) {
+        const productId = productIds[i];
+        const quantity = quantities[i];
+        const product = products.find((p) => p.id === productId);
 
-      this.inventoryGateway.broadcastStockUpdate(product.id, updated.stock);
-    }
+        if (!product || product.stock < quantity) {
+          throw new BadRequestException(
+            `Insufficient stock for product ${productId ?? ''}`,
+          );
+        }
 
-    // Persist Order first, then OrderItems — avoids cascade / empty UPDATE bugs
-    const savedOrder = await this.orderRepository.save(
-      this.orderRepository.create({
+        // Deduct Stock
+        product.stock -= quantity;
+        await queryRunner.manager.save(product);
+
+        lines.push({
+          productId: product.id,
+          quantity,
+          unitPrice: product.price,
+          stockAfter: product.stock,
+        });
+        totalAmount += product.price * quantity;
+        stockUpdates.push({ id: product.id, stockAfter: product.stock });
+      }
+
+      // 2. Persist Order
+      const savedOrder = await queryRunner.manager.save(Order, {
         user: { id: user.id } as User,
         status: 'Order Received',
         firstName: dto.firstName,
@@ -133,24 +147,33 @@ export class OrdersService {
         zip: dto.zip,
         total: totalAmount,
         totalAmount,
-      }),
-    );
+      });
+      savedOrderId = savedOrder.id;
 
-    for (const line of lines) {
-      await this.orderItemRepository
-        .createQueryBuilder()
-        .insert()
-        .into(OrderItem)
-        .values({
+      // 3. Persist OrderItems
+      for (const line of lines) {
+        await queryRunner.manager.insert(OrderItem, {
           order: { id: savedOrder.id },
           product: { id: line.productId },
           quantity: line.quantity,
           priceAtPurchase: line.unitPrice,
-        })
-        .execute();
+        });
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
 
-    const complete = await this.findById(savedOrder.id);
+    // Emit WebSocket updates only after successful commit
+    for (const update of stockUpdates) {
+      this.inventoryGateway.broadcastStockUpdate(update.id, update.stockAfter);
+    }
+
+    const complete = await this.findById(savedOrderId);
     if (!complete) {
       throw new NotFoundException('Order could not be reloaded');
     }

@@ -1,4 +1,4 @@
-name: Real-World CI Pipeline
+name: CI/CD Pipeline for Smash Precision
 
 on:
   push:

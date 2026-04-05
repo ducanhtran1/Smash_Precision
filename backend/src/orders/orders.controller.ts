@@ -63,13 +63,16 @@ export class OrdersController {
     );
 
     if (!isStockAvailable) {
-      throw new BadRequestException('Insufficient stock for one or more requested items.');
+      throw new BadRequestException(
+        'Insufficient stock for one or more requested items.',
+      );
     }
 
     // Phase 2: Add into Postgres Queue processing
-    const queueId = Date.now().toString() + '-' + Math.floor(Math.random() * 10000);
+    const queueId =
+      Date.now().toString() + '-' + Math.floor(Math.random() * 10000);
     await this.ordersQueue.add('process-order', { ...createOrderDto, queueId });
-    
+
     return { status: 'queued', message: 'Order placed in queue', queueId };
   }
 

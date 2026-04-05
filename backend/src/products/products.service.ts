@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,7 +13,7 @@ import { DeepPartial, In, Repository } from 'typeorm';
 import { SAMPLE_PRODUCTS } from './sample-products.seed';
 
 @Injectable()
-export class ProductsService {
+export class ProductsService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,

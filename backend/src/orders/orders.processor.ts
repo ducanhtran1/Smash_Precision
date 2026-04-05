@@ -4,6 +4,7 @@ import { OrdersService } from './orders.service';
 import { InventoryGateway } from '../events/inventory.gateway';
 import { RedisService } from '../redis/redis.service';
 import { Logger } from '@nestjs/common';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Processor('orders')
 export class OrdersProcessor extends WorkerHost {
@@ -17,39 +18,48 @@ export class OrdersProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(
+    job: Job<CreateOrderDto & { queueId: string }, any, string>,
+  ): Promise<any> {
     const queueId = job.data.queueId;
     this.logger.log(`Processing order job: ${queueId}`);
 
     try {
       // 1. Run the heavyweight database action natively inside the worker
       const order = await this.ordersService.createOrder(job.data);
-      
-      this.logger.log(`Order job ${queueId} succeeded. DB Order ID: ${order.id}`);
+
+      this.logger.log(
+        `Order job ${queueId} succeeded. DB Order ID: ${order.id}`,
+      );
 
       // 2. Transmit success directly back to the customer's waiting UI over WebSocket
-      this.inventoryGateway.server.emit(`order_status_${queueId}`, { 
-        status: 'success', 
-        orderId: order.id 
+      this.inventoryGateway.server.emit(`order_status_${queueId}`, {
+        status: 'success',
+        orderId: order.id,
       });
 
       return order;
     } catch (error: any) {
       this.logger.error(`Order job ${queueId} failed: ${error.message}`);
-      
+
       // FATAL WORKER CRASH: Provide an automatic reimbursement to the RAM stock limits.
       try {
         for (let i = 0; i < job.data.productIds.length; i++) {
-          await this.redisService.incrementStock(job.data.productIds[i], job.data.quantities[i]);
+          await this.redisService.incrementStock(
+            job.data.productIds[i],
+            job.data.quantities[i],
+          );
         }
       } catch (err: any) {
-        this.logger.error(`Failed to restock Redis during rollback: ${err.message}`);
+        this.logger.error(
+          `Failed to restock Redis during rollback: ${err.message}`,
+        );
       }
-      
+
       // 3. Transmit the database failure (e.g., Not enough stock) over WebSocket
-      this.inventoryGateway.server.emit(`order_status_${queueId}`, { 
-        status: 'failed', 
-        message: error.message || 'Transaction failed in processing'
+      this.inventoryGateway.server.emit(`order_status_${queueId}`, {
+        status: 'failed',
+        message: error.message || 'Transaction failed in processing',
       });
 
       throw error;

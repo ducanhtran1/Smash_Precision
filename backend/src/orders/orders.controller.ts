@@ -24,6 +24,13 @@ export class OrdersController {
     return this.ordersService.findAll();
   }
 
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Get all orders for a specific user' })
+  @ApiResponse({ status: 200, description: 'Return array of orders' })
+  findByUserId(@Param('userId') userId: string) {
+    return this.ordersService.findByUserId(userId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get an order by ID' })
   @ApiResponse({ status: 200, description: 'Return a single order' })

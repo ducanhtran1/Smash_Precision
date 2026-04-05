@@ -5,7 +5,7 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { handleFirestoreError, OperationType } from '@/src/lib/error-handler';
 
 const Account = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, logout } = useAuth();
   const [formData, setFormData] = useState({
     displayName: '',
     bio: '',
@@ -45,7 +45,7 @@ const Account = () => {
     <main className="pt-32 pb-32 px-6 max-w-screen-2xl mx-auto">
       <header className="mb-20">
         <h1 className="text-7xl font-black tracking-tighter uppercase mb-2">Account</h1>
-        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-neutral-400">System Configuration / User: {user.uid.slice(0, 8).toUpperCase()}</p>
+        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-neutral-400">System Configuration / User: {(user.uid || user.id).slice(0, 8).toUpperCase()}</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
@@ -97,13 +97,26 @@ const Account = () => {
               </div>
             </div>
 
-            <div className="flex justify-start">
+            <div className="flex justify-start gap-4">
               <button 
                 onClick={handleUpdate}
                 disabled={loading}
                 className="bg-black text-white font-sans text-[10px] tracking-widest uppercase font-bold px-12 py-4 hover:bg-neutral-800 transition-colors disabled:opacity-50"
               >
                 {loading ? 'UPDATING...' : 'Update Identity'}
+              </button>
+              
+              <button 
+                onClick={async () => {
+                  try {
+                    await logout();
+                  } catch (e) {
+                    console.error('Logout error', e);
+                  }
+                }}
+                className="border-2 border-black text-black font-sans text-[10px] tracking-widest uppercase font-bold px-12 py-4 hover:bg-neutral-50 transition-colors"
+              >
+                Sign Out
               </button>
             </div>
           </div>

@@ -53,7 +53,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (base) {
           throw fetchError;
         }
-        response = await fetch('http://localhost:3001/api/products', { cache: 'no-store' });
+        throw new Error('Ensure your VITE_API_URL environment variable is set. Proxy fetch failed.');
       }
       if (!response.ok) {
         throw new Error(`Failed to fetch products (${response.status})`);

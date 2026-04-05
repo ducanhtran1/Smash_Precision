@@ -5,10 +5,10 @@ import { ShoppingBag, User, Search, Menu, X, ChevronRight, ArrowRight, Verified,
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider, useCart } from './contexts/CartContext';
 import { ProductsProvider } from './contexts/ProductsContext';
-import { signInWithGoogle, logout } from './lib/firebase';
+import { signInWithGoogle } from './lib/firebase';
 import { cn } from './lib/utils';
 
-// Pages (to be implemented)
+// Pages
 import Home from './pages/Home';
 import Collection from './pages/Collection';
 import ProductDetail from './pages/ProductDetail';
@@ -21,6 +21,7 @@ import Checkout from './pages/Checkout';
 import Confirmation from './pages/Confirmation';
 import TechGuide from './pages/TechGuide';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 const Navbar = () => {
   const { user, profile } = useAuth();
@@ -162,6 +163,7 @@ export default function App() {
                   <Route path="/confirmation/:orderId" element={<PageTransition><Confirmation /></PageTransition>} />
                   <Route path="/guide" element={<PageTransition><TechGuide /></PageTransition>} />
                   <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+                  <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
                 </Routes>
               </AnimatePresence>
             </main>

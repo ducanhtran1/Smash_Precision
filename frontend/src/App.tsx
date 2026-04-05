@@ -151,14 +151,25 @@ export default function App() {
             position="bottom-center"
             toastOptions={{
               style: {
-                borderRadius: '0px',
-                background: '#000',
-                color: '#fff',
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                fontWeight: 'bold',
-                padding: '16px 24px',
+                borderRadius: '8px',
+                background: '#fff',
+                color: '#171717',
+                fontSize: '13px',
+                fontWeight: '500',
+                padding: '12px 20px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                border: '1px solid #f5f5f5',
+              },
+              error: {
+                style: {
+                  background: '#fff',
+                  border: '1px solid #fee2e2',
+                  color: '#b91c1c',
+                },
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
               },
             }}
           />

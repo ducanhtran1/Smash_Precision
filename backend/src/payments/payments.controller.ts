@@ -68,13 +68,20 @@ export class PaymentsController {
       3600,
     );
 
+    // Use the first URL if FRONTEND_URL contains a comma-separated list
+    const rawFrontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    let frontendUrl = rawFrontendUrl.split(',')[0].trim();
+    if (!frontendUrl.startsWith('http')) {
+      frontendUrl = `https://${frontendUrl}`;
+    }
+
     // 4. Generate Stripe Checkout URL
     const session = await this.paymentsService.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       line_items,
-      success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/thank-you`,
-      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/cart`,
+      success_url: `${frontendUrl}/thank-you`,
+      cancel_url: `${frontendUrl}/checkout`,
       metadata: {
         checkoutId,
       },

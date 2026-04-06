@@ -1,10 +1,10 @@
-name: Real-World CI Pipeline
+name: CI/CD Pipeline for Smash Precision
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
 jobs:
   # ==============================
@@ -72,3 +72,32 @@ jobs:
 
     - name: Production Build Verification
       run: yarn build
+
+  # ==============================
+  # Job C: Production Deployment
+  # ==============================
+  deploy:
+    name: Deploy to Production
+    # This ensures Deploy only runs if Frontend and Backend successfully compiled
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    
+    # THE MAGIC: Deploy if:
+    # 1. You push a commit that says 'deploy prod' (great for testing from develop)
+    # OR
+    # 2. You merge a Pull Request into the main branch (industry standard)
+    if: contains(github.event.head_commit.message, 'deploy prod') || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy Backend to Railway
+        # This will upload just the backend to your Railway project
+        run: |
+          railway up --service Smash_Precision --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

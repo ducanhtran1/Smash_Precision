@@ -1,9 +1,12 @@
 import { InventoryGateway } from '@/events/inventory.gateway';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { DataSource, Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { User } from '@/users/entities/user.entity';
@@ -19,6 +22,8 @@ export class OrdersService {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
     private readonly inventoryGateway: InventoryGateway,
     private readonly productService: ProductsService,
     private readonly userService: UsersService,
@@ -161,6 +166,8 @@ export class OrdersService {
       }
 
       await queryRunner.commitTransaction();
+      // Purge catalogue cache to immediately reflect new stock levels to next visitor
+      await this.cacheManager.del('all_products');
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;

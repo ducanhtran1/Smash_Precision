@@ -1,15 +1,33 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
+import { RedisService } from '../redis/redis.service';
 import { Product } from './entities/product.entity';
 import { DeepPartial, In, Repository } from 'typeorm';
 import { SAMPLE_PRODUCTS } from './sample-products.seed';
 
 @Injectable()
-export class ProductsService {
+export class ProductsService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
+    private readonly redisService: RedisService,
   ) {}
+
+  async onApplicationBootstrap() {
+    const products = await this.productRepository.find();
+    for (const p of products) {
+      await this.redisService.syncInventory(p.id, p.stock);
+    }
+  }
 
   async findAll() {
     return this.productRepository.find();
@@ -29,7 +47,10 @@ export class ProductsService {
       ...productData,
       imageUrl: imageURL,
     });
-    return this.productRepository.save(newProduct);
+    const saved = await this.productRepository.save(newProduct);
+    await this.redisService.syncInventory(saved.id, saved.stock);
+    await this.cacheManager.del('all_products');
+    return saved;
   }
 
   /**
@@ -73,12 +94,17 @@ export class ProductsService {
     if (productData.stock !== undefined) product.stock = productData.stock;
     if (imageURL) product.imageUrl = imageURL;
 
-    return this.productRepository.save(product);
+    const saved = await this.productRepository.save(product);
+    await this.redisService.syncInventory(saved.id, saved.stock);
+    await this.cacheManager.del('all_products');
+    return saved;
   }
 
   async remove(id: string) {
     const product = await this.findById(id);
     if (!product) throw new NotFoundException('Product not found');
-    return this.productRepository.remove(product);
+    const removed = await this.productRepository.remove(product);
+    await this.cacheManager.del('all_products');
+    return removed;
   }
 }

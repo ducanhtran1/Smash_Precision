@@ -6,7 +6,7 @@ import { getCorsOrigins } from './cors-origins';
 import { RedisIoAdapter } from './redis-io.adapter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   const redisAdapter = new RedisIoAdapter(app);
   await redisAdapter.connectToRedis();

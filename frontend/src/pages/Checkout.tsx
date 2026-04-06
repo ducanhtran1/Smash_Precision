@@ -5,6 +5,7 @@ import { useCart } from '@/src/contexts/CartContext';
 import { useProducts } from '@/src/contexts/ProductsContext';
 import { CreditCard, Wallet, Verified } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 const Checkout = () => {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ const Checkout = () => {
   const { refreshProducts } = useProducts();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [queued, setQueued] = useState(false);
   const [address, setAddress] = useState({
     firstName: '',
     lastName: '',
@@ -31,7 +33,7 @@ const Checkout = () => {
     setLoading(true);
     try {
       const base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? '';
-      const url = base ? `${base}/api/orders` : '/api/orders';
+      const url = base ? `${base}/api/payments/create-checkout-session` : '/api/payments/create-checkout-session';
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -51,27 +53,31 @@ const Checkout = () => {
       });
 
       if (!res.ok) {
+        setLoading(false);
         const text = await res.text();
-        let errorMsg = `Order failed (${res.status})`;
+        let errorMsg = `Payment session failed (${res.status})`;
         try {
           const json = JSON.parse(text);
-          if (json.message) {
-            errorMsg = Array.isArray(json.message) ? json.message[0] : json.message;
-          }
+          errorMsg = json.message || errorMsg;
         } catch {
           if (text) errorMsg = text;
         }
-        throw new Error(errorMsg);
+        throw new Error(typeof errorMsg === 'string' ? errorMsg : errorMsg[0]);
       }
 
-      const order = (await res.json()) as { id: string };
-      clearCart();
-      await refreshProducts();
-      navigate(`/confirmation/${order.id}`);
+      const response = await res.json();
+      if (response.url) {
+        // Clear cart now or wait until webhook completes?
+        // Usually, Stripe hosted checkout handles returning.
+        // We'll clear the cart right before redirecting so they don't accidentally buy it twice.
+        clearCart();
+        window.location.href = response.url;
+      } else {
+        throw new Error('Failed to generate payment link. Please try again.');
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Order failed';
       toast.error(message);
-    } finally {
       setLoading(false);
     }
   };
@@ -224,7 +230,7 @@ const Checkout = () => {
                 disabled={loading || items.length === 0}
                 className="w-full bg-black text-white py-6 font-bold uppercase tracking-[0.2em] text-xs hover:bg-neutral-800 transition-all disabled:opacity-50"
               >
-                {loading ? 'PROCESSING...' : 'Complete Purchase'}
+                {loading ? 'PROCESSING...' : 'Proceed to Payment'}
               </button>
               <p className="text-[9px] text-center text-neutral-400 uppercase tracking-widest leading-relaxed">
                 By clicking &quot;Complete Purchase&quot;, you agree to our terms of engineering and shipping protocols.

@@ -129,6 +129,33 @@ const Home = () => {
           </div>
         </div>
       </section>
+      {/* Contact Section */}
+      <section className="py-40 px-10 bg-black text-white text-center">
+        <div className="max-w-screen-2xl mx-auto flex flex-col items-center">
+          <span className="font-sans text-[11px] tracking-[0.3em] uppercase text-neutral-400 mb-8 block">02 / 03 OPERATIONS</span>
+          <h2 className="text-[clamp(2.5rem,6vw,4rem)] font-black tracking-tighter uppercase leading-tight mb-12">
+            CONNECT WITH US
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 w-full max-w-5xl mt-10">
+            <div className="flex flex-col items-center text-center">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-4">Email HQ</span>
+              <a href="mailto:tdanhaltt18@gmail.com" className="text-sm font-medium tracking-wide hover:text-neutral-300 transition-colors">tdanhaltt18@gmail.com</a>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-4">Direct Line</span>
+              <a href="tel:0965316967" className="text-sm font-medium tracking-wide hover:text-neutral-300 transition-colors">0965316967</a>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-4">Laboratory Location</span>
+              <span className="text-sm font-medium tracking-wide leading-relaxed">Dinh Cong street, Hoang Mai district<br/>Ha Noi, Viet Nam</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-4">Social</span>
+              <a href="https://www.facebook.com/ducanhnew" target="_blank" rel="noopener noreferrer" className="text-sm font-medium tracking-wide hover:text-neutral-300 transition-colors border-b border-white pb-1">Facebook</a>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

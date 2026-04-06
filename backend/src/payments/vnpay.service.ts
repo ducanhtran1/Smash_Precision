@@ -5,10 +5,18 @@ import moment from 'moment';
 
 @Injectable()
 export class VnpayService {
-  public generatePaymentUrl(ipAddr: string, amount: number, orderInfo: string, returnUrl: string, checkoutId: string): string {
+  public generatePaymentUrl(
+    ipAddr: string,
+    amount: number,
+    orderInfo: string,
+    returnUrl: string,
+    checkoutId: string,
+  ): string {
     const tmnCode = process.env.VNP_TMNCODE || '';
     const secretKey = process.env.VNP_HASHSECRET || '';
-    let vnpUrl = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
+    let vnpUrl =
+      process.env.VNP_URL ||
+      'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
 
     const createDate = moment(new Date()).format('YYYYMMDDHHmmss');
     const orderId = checkoutId;
@@ -30,15 +38,15 @@ export class VnpayService {
 
     // Sort params
     const sortedParams = this.sortObject(vnp_Params);
-    
+
     // Create query string
     const signData = qs.stringify(sortedParams, { encode: false });
     const hmac = crypto.createHmac('sha512', secretKey);
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-    
+
     sortedParams['vnp_SecureHash'] = signed;
     vnpUrl += '?' + qs.stringify(sortedParams, { encode: false });
-    
+
     return vnpUrl;
   }
 
@@ -62,7 +70,7 @@ export class VnpayService {
     const str = [];
     let key;
     for (key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         str.push(encodeURIComponent(key));
       }
     }

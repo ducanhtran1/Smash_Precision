@@ -9,7 +9,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col md:flex-row items-center px-10 gap-20 overflow-hidden">
         <div className="z-10 w-full md:w-1/2 flex flex-col justify-center">
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
@@ -17,15 +17,15 @@ const Home = () => {
           >
             EST. 2024 / PRECISION SERIES
           </motion.span>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="text-[clamp(3rem,8vw,6rem)] font-black leading-[0.9] tracking-tighter text-black mb-8"
           >
-            PERFORMANCE<br/>IN MONOCHROME.
+            PERFORMANCE<br />IN MONOCHROME.
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
@@ -33,19 +33,19 @@ const Home = () => {
           >
             The purest equipment for the competitive court. Engineered with mathematical silence to eliminate distraction and amplify every smash.
           </motion.p>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-6"
           >
-            <Link 
+            <Link
               to="/collections/all"
               className="bg-black text-white px-11 py-4 text-[12px] font-bold tracking-[0.1em] uppercase transition-all duration-300 hover:bg-neutral-800 text-center"
             >
               SHOP COLLECTION
             </Link>
-            <Link 
+            <Link
               to="/guide"
               className="bg-transparent border border-neutral-200 text-black px-11 py-4 text-[12px] font-bold tracking-[0.1em] uppercase transition-all duration-300 hover:bg-neutral-50 text-center"
             >
@@ -53,18 +53,18 @@ const Home = () => {
             </Link>
           </motion.div>
         </div>
-        
+
         <div className="relative w-full md:w-1/2 h-[600px] md:h-screen flex items-center justify-center">
           <div className="absolute right-0 top-1/2 -translate-y-1/2 [writing-mode:vertical-rl] font-black text-[153px] opacity-[0.03] select-none pointer-events-none">
             PRECISION
           </div>
-          <motion.img 
+          <motion.img
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            alt="Minimalist Carbon Fiber Racket" 
-            className="w-full h-full object-contain grayscale mix-blend-multiply" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkX8MKWpeYuwKkL1eQ-53Cdm8PJyNbJYeAV-cMLhrRFJOqMX99-8Qcl9_3_y-ocDWCAyj228GGj3t0qxaXrp1ZqRzdFhBa8NnEeNmGgvfbawjDw7JGctO02oyOT-uOvB8ZCNN0-sHPVbjKn87e3LNsHWotRU0FgMvdSGXG6_s8JDKYl9GF9DjrBXT_bjHRo_CkWaG_nQb7Bye4k1yrCdz7z0Dp6yo4_W_lqZk3WuHXz7mWnv5fH86HCUQabJSqJU7Pd6fb_odPG0E"
+            alt="Minimalist Carbon Fiber Racket"
+            className="w-full h-full object-contain grayscale mix-blend-multiply"
+            src="https://res.cloudinary.com/dhachayhw/image/upload/q_auto/f_auto/v1775475293/racket_4k_pwjesv.jpg"
           />
         </div>
       </section>
@@ -79,18 +79,18 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
             {[
-              { title: 'Rackets', tag: 'Technical Core', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBxgqfGbnOw9O0yN9Sy_ni_5pFQHCen2jSM1Fhc1SLUkrxtC3O0xgrMuAAmJjUo_Cz2zRJ3ql531lIU09rXYzYlaO5HEM4oAXO-12Zj16r1pWtVmUd_xrywN4Fm7PzQbX2TcXzY47muieGHuPvOZV7kM7q-4P_lVA5o-4SBUHwBETIl724sXK_UYuo-7MTIpmw0SFR6fR6q_hRHTqFQB2fyWynAzDpL6NqJSUgbSo5gAD-RHPDJ-48g6WpKrbQ896zm5QcVdaa4uMg' },
+              { title: 'Rackets', tag: 'Technical Core', img: 'https://res.cloudinary.com/dhachayhw/image/upload/q_auto/f_auto/v1775475293/CLP_All_Badminton_Racquets_Banner_Mobile_bam9ba.webp' },
               { title: 'Footwear', tag: 'Kinetic Support', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCvYfKlTnh781rd_UnYNVq8hYp9z5tUm8t0jxzAQdhsAuUkGHre66chlxs10Rtd_KLdCcl08ebC0QoLvfWxVrh3S9QW5e1rg0vUHj84vXn8k3w4P_NgHG0udbnEB5z84RNvYF8SavGfJomdHFZITdRU978-unEI3LK2oUMmRq30N3YxBl4fTjIuYWtEqgOT4_wh1N4aNNTlEMRjekxkS1Ldp0mTGRMlgyu1fG65P2bdhmIjIrK5Re0L3jheFHQEmC7lSjzLB7nKzKc' },
-              { title: 'Shuttlecocks', tag: 'Aero Dynamics', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnPeu8HoeLQoOBGfnFY6NuzsihyC2_f5TUb54shmh6P1O6uJbg-r8czsbMhcrDwns2AQGiO1KCl8UxPbdMJ4lJj31VymY1YKqi6rZwiSJnHLWOY5JiRArpnk5VaKUylCK6QOpJcSyr-juGg-XVpqW7pYIzt1t-xixdSKFiL0Oqq_25y0w4D8_C37cPUOgTeZH2VWSpiUuDvJnzLuwSI0S8RkjaY8OkH92Cv4jpqvdhyrX3dc-gqd9Vyc9MW50PMBgxRvrK3VNmYVs' }
+              { title: 'Shuttlecocks', tag: 'Aero Dynamics', img: 'https://res.cloudinary.com/dhachayhw/image/upload/q_auto/f_auto/v1775475293/badminton-shuttle-sport-bat_kwjakh.jpg' }
             ].map((cat) => (
-              <Link 
+              <Link
                 key={cat.title}
                 to={`/collections/${cat.title.toLowerCase()}`}
                 className="group relative aspect-[3/4] bg-white overflow-hidden"
               >
-                <img 
-                  alt={cat.title} 
-                  className="w-full h-full object-cover grayscale transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" 
+                <img
+                  alt={cat.title}
+                  className="w-full h-full object-cover grayscale transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
                   src={cat.img}
                 />
                 <div className="absolute inset-0 p-10 flex flex-col justify-end bg-gradient-to-t from-black/40 to-transparent">
@@ -108,9 +108,9 @@ const Home = () => {
       <section className="py-40 px-10 max-w-screen-2xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
           <div className="md:col-span-7 aspect-video bg-neutral-100 overflow-hidden">
-            <img 
-              alt="Carbon Detail" 
-              className="w-full h-full object-cover grayscale" 
+            <img
+              alt="Carbon Detail"
+              className="w-full h-full object-cover grayscale"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy5MPkxkMRVyH4CyjNwsg3CleMKdhmFsgvAU_1BZLBRLaFmw_nH6GhIlawzeqSb9Bd0mgM2yB5Czh0jigvnPctglPQSs8jUfkrqxhzvfJdRF2RzJagfoLBkiuU-IOi0yt-oFH9kjpni_yVuL4awjzA_oDPqCUhPjbn4JUi79wtVe8Of2g2DjKV_vxFYPoAiMSeWit9SKiSb2SLLn09wI1Kw7xOhf4P8C8CaYVBVTwczS-pT6mP9V_XVqNfVRp4hmIYwmdgBvM5Mzg"
             />
           </div>
@@ -147,7 +147,7 @@ const Home = () => {
             </div>
             <div className="flex flex-col items-center text-center">
               <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-4">Laboratory Location</span>
-              <span className="text-sm font-medium tracking-wide leading-relaxed">Dinh Cong street, Hoang Mai district<br/>Ha Noi, Viet Nam</span>
+              <span className="text-sm font-medium tracking-wide leading-relaxed">Dinh Cong street, Hoang Mai district<br />Ha Noi, Viet Nam</span>
             </div>
             <div className="flex flex-col items-center text-center">
               <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-4">Social</span>

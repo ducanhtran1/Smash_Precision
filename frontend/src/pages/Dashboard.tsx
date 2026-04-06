@@ -22,12 +22,12 @@ const Dashboard = () => {
       try {
         const token = localStorage.getItem('token');
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        
+
         // Either use the token or Firebase ID token depending on which auth they chose
         const response = await fetch(`${API_URL}/api/orders/user/${user.uid || user.id}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
-        
+
         if (response.ok) {
           const orders = await response.json();
           setRecentOrders(orders);
@@ -64,13 +64,13 @@ const Dashboard = () => {
         <section className="mb-20">
           <span className="text-[11px] tracking-[0.3em] uppercase text-neutral-400 font-medium mb-2 block">System Status: Active</span>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-black leading-none mb-8 uppercase">
-            WELCOME, <br/>{profile?.displayName?.split(' ')[0] || 'ATHLETE'}
+            WELCOME, <br />{profile?.displayName?.split(' ')[0] || 'ATHLETE'}
           </h1>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-neutral-100 border border-neutral-100">
             <div className="bg-white p-10 flex flex-col justify-between aspect-video md:aspect-auto">
-              <span className="text-[10px] tracking-widest uppercase text-neutral-400">Total Precision Gear</span>
-              <span className="text-4xl font-light tracking-tighter">12 <span className="text-sm font-bold uppercase tracking-widest text-neutral-400 ml-2">Units</span></span>
+              <span className="text-[10px] tracking-widest uppercase text-neutral-400">Total Orders</span>
+              <span className="text-4xl font-light tracking-tighter">{recentOrders.length} <span className="text-sm font-bold uppercase tracking-widest text-neutral-400 ml-2">Orders</span></span>
             </div>
             <div className="bg-white p-10 flex flex-col justify-between aspect-video md:aspect-auto">
               <span className="text-[10px] tracking-widest uppercase text-neutral-400">Member Tier</span>
@@ -85,7 +85,7 @@ const Dashboard = () => {
               <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold">Recent Logistics</h2>
               <Link to="/orders" className="text-[10px] tracking-widest uppercase text-neutral-400 hover:text-black transition-colors">View Archive</Link>
             </div>
-            
+
             <div className="space-y-px bg-neutral-100">
               {recentOrders.length > 0 ? recentOrders.map(order => (
                 <div key={order.id} className="bg-white py-8 flex flex-col md:flex-row md:items-center justify-between group transition-colors hover:bg-neutral-50 px-4">
@@ -118,9 +118,9 @@ const Dashboard = () => {
             <div>
               <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold mb-8 border-b border-neutral-100 pb-4">Gear Locker</h2>
               <Link to="/locker" className="relative group cursor-pointer overflow-hidden bg-black aspect-square block">
-                <img 
-                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 grayscale" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAafRvnKEIcAq5KAgfdIXQRqekjXN4iRel1d_d31SNhnh8l4ldeWbnar0BFJhHw__wHpGTmIuUAwNY__ZVSbofcbvkOqRA123vpxm1gG-1D837-__ySnemVHAr8044Q7HrrulmVt1JtG9A0m9BK2N3_mYLfZXNnVvlpyvQf4dXIf-2vzoLwLURVHEmNf5M9xIP9ME6u7dSduXQXKTElSv8KI2bo1nHKU3_0zMt5SHpZev-9Szsa65EZnCrPHzxKNs4YI_DLBWLA6q8" 
+                <img
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 grayscale"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAafRvnKEIcAq5KAgfdIXQRqekjXN4iRel1d_d31SNhnh8l4ldeWbnar0BFJhHw__wHpGTmIuUAwNY__ZVSbofcbvkOqRA123vpxm1gG-1D837-__ySnemVHAr8044Q7HrrulmVt1JtG9A0m9BK2N3_mYLfZXNnVvlpyvQf4dXIf-2vzoLwLURVHEmNf5M9xIP9ME6u7dSduXQXKTElSv8KI2bo1nHKU3_0zMt5SHpZev-9Szsa65EZnCrPHzxKNs4YI_DLBWLA6q8"
                   alt="Gear Locker"
                 />
                 <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-black/60 to-transparent">

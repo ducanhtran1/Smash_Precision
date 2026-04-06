@@ -21,6 +21,7 @@ const Checkout = () => {
     city: '',
     zip: '',
   });
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'vnpay'>('stripe');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +50,7 @@ const Checkout = () => {
           street: address.street,
           city: address.city,
           zip: address.zip,
+          paymentMethod,
         }),
       });
 
@@ -202,6 +204,48 @@ const Checkout = () => {
                 />
               </div>
             </form>
+          </section>
+
+          {/* Section 3: Payment Method */}
+          <section>
+            <div className="mb-10">
+              <h2 className="font-sans text-[11px] tracking-[0.2em] uppercase font-bold">03. Payment Method</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label 
+                className={`border p-6 cursor-pointer transition-all flex flex-col gap-2 ${paymentMethod === 'stripe' ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-black'}`}
+              >
+                <div className="flex justify-between items-center w-full">
+                  <span className="text-[12px] font-bold uppercase tracking-widest text-black">International Card</span>
+                  <input 
+                    type="radio" 
+                    name="paymentMethod" 
+                    value="stripe" 
+                    checked={paymentMethod === 'stripe'} 
+                    onChange={() => setPaymentMethod('stripe')}
+                    className="accent-black w-4 h-4 cursor-pointer"
+                  />
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400">Powered by Stripe</span>
+              </label>
+
+              <label 
+                className={`border p-6 cursor-pointer transition-all flex flex-col gap-2 ${paymentMethod === 'vnpay' ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-black'}`}
+              >
+                <div className="flex justify-between items-center w-full">
+                  <span className="text-[12px] font-bold uppercase tracking-widest text-black">VNPay</span>
+                  <input 
+                    type="radio" 
+                    name="paymentMethod" 
+                    value="vnpay" 
+                    checked={paymentMethod === 'vnpay'} 
+                    onChange={() => setPaymentMethod('vnpay')}
+                    className="accent-black w-4 h-4 cursor-pointer"
+                  />
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400">Local VN Gateway</span>
+              </label>
+            </div>
           </section>
         </div>
 

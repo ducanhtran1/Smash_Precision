@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { AuthModule } from './auth/auth.module';
+import { PaymentsModule } from './payments/payments.module';
 import { User } from './users/entities/user.entity';
 import { Product } from './products/entities/product.entity';
 import { Order } from './orders/entities/order.entity';
@@ -57,6 +58,7 @@ import { HealthModule } from './health/health.module';
     AuthModule,
     EventsModule,
     HealthModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

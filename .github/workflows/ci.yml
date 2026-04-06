@@ -82,8 +82,11 @@ jobs:
     needs: [frontend, backend]
     runs-on: ubuntu-latest
     
-    # THE MAGIC: It specifically scans your git commit message!
-    if: contains(github.event.head_commit.message, 'deploy prod')
+    # THE MAGIC: Deploy if:
+    # 1. You push a commit that says 'deploy prod' (great for testing from develop)
+    # OR
+    # 2. You merge a Pull Request into the main branch (industry standard)
+    if: contains(github.event.head_commit.message, 'deploy prod') || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout Repository

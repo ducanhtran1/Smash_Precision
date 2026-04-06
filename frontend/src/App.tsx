@@ -20,6 +20,7 @@ import OrderHistory from './pages/OrderHistory';
 import GearLocker from './pages/GearLocker';
 import Checkout from './pages/Checkout';
 import Confirmation from './pages/Confirmation';
+import ThankYou from './pages/ThankYou';
 import TechGuide from './pages/TechGuide';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -187,6 +188,7 @@ export default function App() {
                   <Route path="/orders" element={<PageTransition><OrderHistory /></PageTransition>} />
                   <Route path="/locker" element={<PageTransition><GearLocker /></PageTransition>} />
                   <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
+                  <Route path="/thank-you" element={<PageTransition><ThankYou /></PageTransition>} />
                   <Route path="/confirmation/:orderId" element={<PageTransition><Confirmation /></PageTransition>} />
                   <Route path="/guide" element={<PageTransition><TechGuide /></PageTransition>} />
                   <Route path="/login" element={<PageTransition><Login /></PageTransition>} />

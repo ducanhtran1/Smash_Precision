@@ -33,7 +33,7 @@ const Checkout = () => {
     setLoading(true);
     try {
       const base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? '';
-      const url = base ? `${base}/api/orders` : '/api/orders';
+      const url = base ? `${base}/api/payments/create-checkout-session` : '/api/payments/create-checkout-session';
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,53 +55,30 @@ const Checkout = () => {
       if (!res.ok) {
         setLoading(false);
         const text = await res.text();
-        let errorMsg = `Order failed (${res.status})`;
+        let errorMsg = `Payment session failed (${res.status})`;
         try {
           const json = JSON.parse(text);
-          if (json.message) {
-            errorMsg = Array.isArray(json.message) ? json.message[0] : json.message;
-          }
+          errorMsg = json.message || errorMsg;
         } catch {
           if (text) errorMsg = text;
         }
-        throw new Error(errorMsg);
+        throw new Error(typeof errorMsg === 'string' ? errorMsg : errorMsg[0]);
       }
 
-      const response = await res.json() as { queueId?: string, id?: string };
-      
-      if (response.queueId) {
-        setQueued(true);
-        const socketURL = base || '/';
-        const socket = io(socketURL);
-        
-        socket.on(`order_status_${response.queueId}`, async (data: any) => {
-          if (data.status === 'success') {
-            socket.disconnect();
-            clearCart();
-            await refreshProducts();
-            navigate(`/confirmation/${data.orderId}`);
-          } else {
-            socket.disconnect();
-            toast.error(data.message || 'Order failed during processing.');
-            setQueued(false);
-            setLoading(false);
-          }
-        });
-        
-        return; // Purposefully bypassing the 'finally' setLoading(false)
-      }
-
-      if (response.id) {
+      const response = await res.json();
+      if (response.url) {
+        // Clear cart now or wait until webhook completes?
+        // Usually, Stripe hosted checkout handles returning.
+        // We'll clear the cart right before redirecting so they don't accidentally buy it twice.
         clearCart();
-        await refreshProducts();
-        navigate(`/confirmation/${response.id}`);
-        setLoading(false);
+        window.location.href = response.url;
+      } else {
+        throw new Error('Failed to generate payment link. Please try again.');
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Order failed';
       toast.error(message);
       setLoading(false);
-      setQueued(false);
     }
   };
 
@@ -253,7 +230,7 @@ const Checkout = () => {
                 disabled={loading || items.length === 0}
                 className="w-full bg-black text-white py-6 font-bold uppercase tracking-[0.2em] text-xs hover:bg-neutral-800 transition-all disabled:opacity-50"
               >
-                {queued ? 'PROCESSING YOUR ORDER IN LINE...' : loading ? 'PROCESSING...' : 'Complete Purchase'}
+                {loading ? 'PROCESSING...' : 'Proceed to Payment'}
               </button>
               <p className="text-[9px] text-center text-neutral-400 uppercase tracking-widest leading-relaxed">
                 By clicking &quot;Complete Purchase&quot;, you agree to our terms of engineering and shipping protocols.

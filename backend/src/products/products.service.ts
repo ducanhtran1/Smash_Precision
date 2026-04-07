@@ -30,7 +30,32 @@ export class ProductsService implements OnApplicationBootstrap {
   }
 
   async findAll() {
-    return this.productRepository.find();
+    const cachedProducts =
+      await this.cacheManager.get<Product[]>('all_products');
+    if (cachedProducts) {
+      return cachedProducts;
+    }
+
+    // Explicitly select columns to reduce DB to memory bandwidth overhead
+    const products = await this.productRepository.find({
+      select: [
+        'id',
+        'name',
+        'category',
+        'price',
+        'imageUrl',
+        'description',
+        'subCategory',
+        'stock',
+        'isLimited',
+        'createdAt',
+        'updatedAt',
+      ],
+      // Left out `specs` which is a heavy JSON object usually only needed on the Product Detail Page
+    });
+
+    await this.cacheManager.set('all_products', products, 600000); // Cache for 10 minutes (TTL)
+    return products;
   }
 
   async findById(id: string) {

@@ -9,4 +9,8 @@
   body {
     @apply font-sans antialiased bg-white text-black;
   }
+  
+  button {
+    @apply transition-transform duration-100 ease-in-out active:scale-[0.97] disabled:active:scale-100;
+  }
 }

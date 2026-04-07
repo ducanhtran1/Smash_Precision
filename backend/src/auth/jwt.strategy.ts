@@ -17,11 +17,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     sub: string;
     email: string;
     firebaseUid?: string;
+    role?: string;
   }) {
     return {
       id: payload.sub,
       email: payload.email,
       firebaseUid: payload.firebaseUid,
+      role: payload.role,
     };
   }
 }

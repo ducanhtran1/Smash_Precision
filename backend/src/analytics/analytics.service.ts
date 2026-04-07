@@ -20,7 +20,7 @@ export class AnalyticsService {
     // Basic aggregated metrics for the admin layout
     const totalOrders = await this.orderRepository.count();
     const activeUsers = await this.userRepository.count();
-    
+
     const { totalRevenue } = await this.orderRepository
       .createQueryBuilder('order')
       .select('SUM(order.totalAmount)', 'totalRevenue')
@@ -31,8 +31,8 @@ export class AnalyticsService {
     const topProductsRaw = await this.productRepository.find({ take: 3 });
     const topProducts = topProductsRaw.map((p, i) => ({
       name: p.name,
-      qty: (150 - i * 30), // Mock descending quantities
-      revenue: `$${((150 - i * 30) * p.price).toLocaleString()}`
+      qty: 150 - i * 30, // Mock descending quantities
+      revenue: `$${((150 - i * 30) * p.price).toLocaleString()}`,
     }));
 
     return {
@@ -40,7 +40,7 @@ export class AnalyticsService {
         totalRevenue: totalRevenue || 0,
         activeUsers,
         orderVolume: totalOrders,
-        conversionRate: "3.24%" // Mock static for now
+        conversionRate: '3.24%', // Mock static for now
       },
       topProducts,
     };

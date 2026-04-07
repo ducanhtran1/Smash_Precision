@@ -14,9 +14,7 @@ export class VnpayService {
   ): string {
     const tmnCode = process.env.VNP_TMNCODE || '';
     const secretKey = process.env.VNP_HASHSECRET || '';
-    let vnpUrl =
-      process.env.VNP_URL ||
-      'https://pay.vnpay.vn/vpcpay.html';
+    let vnpUrl = process.env.VNP_URL || 'https://pay.vnpay.vn/vpcpay.html';
 
     const createDate = moment(new Date()).format('YYYYMMDDHHmmss');
     const orderId = checkoutId;

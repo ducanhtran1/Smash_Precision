@@ -9,6 +9,7 @@ import {
   Query,
   UploadedFiles,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -24,6 +25,9 @@ import {
 } from '@nestjs/swagger';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+import { RolesGuard } from '@/auth/roles.guard';
+import { Roles } from '@/auth/roles.decorator';
 
 @ApiTags('products')
 @Controller('products')
@@ -106,6 +110,8 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiResponse({ status: 200, description: 'Product successfully deleted' })
   remove(@Param('id') id: string) {

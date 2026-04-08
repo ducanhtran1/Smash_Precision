@@ -8,6 +8,7 @@ import {
   Post,
   HttpCode,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -16,6 +17,9 @@ import { RedisService } from '../redis/redis.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+import { RolesGuard } from '@/auth/roles.guard';
+import { Roles } from '@/auth/roles.decorator';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -88,7 +92,9 @@ export class OrdersController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete an order' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiOperation({ summary: 'Delete an order (Admin)' })
   @ApiResponse({ status: 200, description: 'Order deleted' })
   remove(@Param('id') id: string) {
     return this.ordersService.remove(id);

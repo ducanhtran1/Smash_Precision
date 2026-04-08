@@ -1,24 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, UserCircle, Search, X } from "lucide-react";
-import { API_BASE } from "@/lib/api";
+import { X } from "lucide-react";
+import { API_BASE, getAuthHeaders } from "@/lib/api";
+import { AdminHeader } from "@/components/ui/AdminHeader";
 
-type OrderItem = {
-  id: string;
-  price: number;
-  quantity: number;
-  product: { name: string };
-};
-
-type Order = {
-  id: string;
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-  user: { name: string; email: string };
-  items: OrderItem[];
-};
+import { OrderRow, Order } from "@/components/ui/OrderRow";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -74,16 +61,7 @@ export default function OrdersPage() {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-neutral-50 relative">
-      <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-neutral-100">
-        <div className="flex gap-8">
-          <button className="text-[11px] font-bold tracking-widest uppercase text-neutral-400 hover:text-black">Logistics / Orders</button>
-        </div>
-        <div className="flex items-center gap-6">
-          <Search size={12} className="text-neutral-400" />
-          <Bell size={16} className="text-neutral-400 cursor-pointer hover:text-black" />
-          <UserCircle size={18} className="text-neutral-400 cursor-pointer hover:text-black" />
-        </div>
-      </header>
+      <AdminHeader breadcrumbs={["Logistics", "Orders"]} />
 
       <div className="p-12 space-y-12 max-w-6xl mx-auto w-full">
         <div className="flex justify-between items-start">
@@ -111,22 +89,7 @@ export default function OrdersPage() {
           ) : orders.length === 0 ? (
              <div className="p-8 text-center text-xs font-bold text-neutral-400 tracking-widest uppercase">No Orders Found</div>
           ) : orders.map((item) => (
-            <div key={item.id} className="grid grid-cols-[200px_2fr_1fr_1fr_1fr_200px] gap-4 p-6 border-b border-neutral-50 items-center hover:bg-neutral-50 transition-colors">
-              <span className="text-[11px] font-black font-mono break-all pr-4">{item.id}</span>
-              <span className="text-[11px] font-medium">{item.user?.name || item.user?.email || "Unknown Entity"}</span>
-              <span className="text-[10px] text-neutral-500 font-mono tracking-tighter">
-                {new Date(item.createdAt).toLocaleDateString()}
-              </span>
-              <span className="text-[11px] font-black">${Number(item.totalAmount).toLocaleString()}</span>
-              <div>
-                <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 ${getStatusColor(item.status)}`}>
-                  {item.status}
-                </span>
-              </div>
-              <div className="flex justify-end gap-4 text-[8px] font-bold text-neutral-400 uppercase tracking-widest">
-                <button onClick={() => setSelectedOrder(item)} className="hover:text-black hover:border-b hover:border-black transition-all">VIEW DETAILS</button>
-              </div>
-            </div>
+            <OrderRow key={item.id} item={item} onViewDetails={setSelectedOrder} getStatusColor={getStatusColor} />
           ))}
         </div>
       </div>

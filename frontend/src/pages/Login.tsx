@@ -3,6 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { signInWithGoogle } from '@/src/lib/firebase';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Mail, Lock } from 'lucide-react';
+import { Button } from '@/src/components/ui/Button';
+import { Input } from '@/src/components/ui/Input';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3002';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,6 +26,25 @@ const Login = () => {
     setErrorMsg('');
     try {
       await localLogin(email, password);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/dashboard');
+        return;
+      }
+
+      const profileRes = await fetch(`${API_URL}/api/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        if (profile?.role === 'admin') {
+          const redirectUrl = `${ADMIN_URL}/login?token=${encodeURIComponent(token)}`;
+          window.location.href = redirectUrl;
+          return;
+        }
+      }
+
       navigate('/dashboard');
     } catch (error: any) {
       setErrorMsg(error.message || "Invalid email or password");
@@ -73,45 +97,34 @@ const Login = () => {
             )}
             
             <form onSubmit={handleLocalLogin} className="space-y-6">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full bg-neutral-50 border border-neutral-200 py-4 pl-12 pr-4 outline-none focus:border-black transition-colors rounded-none placeholder:text-neutral-400 text-sm"
-                    placeholder="name@example.com"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Email Address"
+                type="email"
+                icon={<Mail className="w-4 h-4" />}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="name@example.com"
+              />
 
               <div className="space-y-1">
                  <div className="flex justify-between">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Password</label>
                   <Link to="#" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-black">Forgot?</Link>
                  </div>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full bg-neutral-50 border border-neutral-200 py-4 pl-12 pr-4 outline-none focus:border-black transition-colors rounded-none placeholder:text-neutral-400 text-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
+                 <Input
+                   type="password"
+                   icon={<Lock className="w-4 h-4" />}
+                   value={password}
+                   onChange={(e) => setPassword(e.target.value)}
+                   required
+                   placeholder="••••••••"
+                 />
               </div>
 
-              <button 
-                type="submit"
-                className="w-full bg-black text-white py-5 px-10 font-bold uppercase text-[11px] tracking-[0.1em] hover:bg-neutral-800 transition-all duration-300"
-              >
+              <Button type="submit" fullWidth size="lg">
                 SIGN IN
-              </button>
+              </Button>
             </form>
 
             <div className="relative flex items-center py-4">
@@ -120,14 +133,17 @@ const Login = () => {
                <div className="flex-grow border-t border-neutral-200"></div>
             </div>
 
-            <button 
-              type="button"
+            <Button 
+              type="button" 
+              variant="outline" 
+              fullWidth 
+              size="lg" 
               onClick={handleGoogleLogin}
-              className="w-full border-2 border-black bg-white text-black py-5 px-10 font-bold uppercase text-[11px] tracking-[0.1em] hover:bg-neutral-50 transition-all duration-300 flex items-center justify-center gap-4"
+              className="gap-4 font-bold border-2"
             >
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 bg-black" />
               SIGN IN WITH GOOGLE
-            </button>
+            </Button>
 
             <footer className="pt-8 border-t border-neutral-100">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

@@ -8,7 +8,7 @@ import { handleFirestoreError, OperationType } from '@/src/lib/error-handler';
 import { ArrowRight, Package } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
 
@@ -39,6 +39,16 @@ const Dashboard = () => {
 
     fetchOrders();
   }, [user, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 px-6 md:px-12 lg:px-20 flex items-center">
+        <p className="text-[10px] tracking-[0.2em] uppercase text-neutral-400 font-bold">
+          Loading account...
+        </p>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
@@ -87,15 +97,26 @@ const Dashboard = () => {
             </div>
 
             <div className="space-y-px bg-neutral-100">
-              {recentOrders.length > 0 ? recentOrders.map(order => (
+              {recentOrders.length > 0 ? recentOrders.map(order => {
+                const firstItem = order.items?.[0];
+                const previewImage = firstItem?.product?.imageUrl || firstItem?.imageUrl || '';
+                const previewName = firstItem?.product?.name || firstItem?.productName || 'Unknown item';
+
+                return (
                 <div key={order.id} className="bg-white py-8 flex flex-col md:flex-row md:items-center justify-between group transition-colors hover:bg-neutral-50 px-4">
                   <div className="flex items-center gap-6 mb-4 md:mb-0">
                     <div className="w-16 h-16 bg-neutral-50 overflow-hidden">
-                      <img className="w-full h-full object-cover grayscale" src={order.items[0].product?.imageUrl || order.items[0].imageUrl} alt={order.items[0].product?.name || order.items[0].productName} />
+                      {previewImage ? (
+                        <img className="w-full h-full object-cover grayscale" src={previewImage} alt={previewName} />
+                      ) : (
+                        <div className="w-full h-full bg-neutral-100" />
+                      )}
                     </div>
                     <div className="md:col-span-2 flex flex-col justify-center">
-                      <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400 mb-2">Order items ({order.items.length})</div>
-                      <h4 className="text-xl font-bold tracking-tight uppercase line-clamp-1">{order.items[0].product?.name || order.items[0].productName} {order.items.length > 1 && `+ ${order.items.length - 1} more`}</h4>
+                      <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400 mb-2">Order items ({order.items?.length ?? 0})</div>
+                      <h4 className="text-xl font-bold tracking-tight uppercase line-clamp-1">
+                        {previewName} {(order.items?.length ?? 0) > 1 && `+ ${(order.items?.length ?? 0) - 1} more`}
+                      </h4>
                     </div>
                   </div>
                   <div className="flex items-center justify-between md:justify-end gap-12">
@@ -106,7 +127,8 @@ const Dashboard = () => {
                     <ArrowRight size={16} className="text-neutral-400 group-hover:text-black transition-colors" />
                   </div>
                 </div>
-              )) : (
+                );
+              }) : (
                 <div className="bg-white py-20 text-center text-neutral-400 uppercase text-[10px] tracking-widest">
                   No recent logistics found.
                 </div>

@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useCart } from '@/src/contexts/CartContext';
-import { useProducts } from '@/src/contexts/ProductsContext';
 import { CreditCard, Wallet, Verified } from 'lucide-react';
+import { CheckoutSummary } from '@/src/components/ui/CheckoutSummary';
+import { Input } from '@/src/components/ui/Input';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
 const Checkout = () => {
   const { user } = useAuth();
   const { items, total, clearCart, removeFromCart, updateQuantity } = useCart();
-  const { refreshProducts } = useProducts();
+  // const { refreshProducts } = useProducts();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [queued, setQueued] = useState(false);
@@ -153,50 +154,50 @@ const Checkout = () => {
               <h2 className="font-sans text-[11px] tracking-[0.2em] uppercase font-bold">02. Shipping Logistics</h2>
             </div>
             <form id="checkout-form" className="grid grid-cols-2 gap-x-8 gap-y-12" onSubmit={handleSubmit}>
-              <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
-                <label className="text-[10px] uppercase tracking-widest text-neutral-400">First Name</label>
-                <input
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+              <div className="col-span-2 md:col-span-1">
+                <Input
+                  variant="underline"
+                  label="First Name"
                   placeholder="JULIAN"
                   type="text"
                   value={address.firstName}
                   onChange={(e) => setAddress({ ...address, firstName: e.target.value })}
                 />
               </div>
-              <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
-                <label className="text-[10px] uppercase tracking-widest text-neutral-400">Last Name</label>
-                <input
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+              <div className="col-span-2 md:col-span-1">
+                <Input
+                  variant="underline"
+                  label="Last Name"
                   placeholder="VANCE"
                   type="text"
                   value={address.lastName}
                   onChange={(e) => setAddress({ ...address, lastName: e.target.value })}
                 />
               </div>
-              <div className="col-span-2 flex flex-col gap-2">
-                <label className="text-[10px] uppercase tracking-widest text-neutral-400">Street Address</label>
-                <input
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+              <div className="col-span-2">
+                <Input
+                  variant="underline"
+                  label="Street Address"
                   placeholder="1248 PRECISION WAY"
                   type="text"
                   value={address.street}
                   onChange={(e) => setAddress({ ...address, street: e.target.value })}
                 />
               </div>
-              <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
-                <label className="text-[10px] uppercase tracking-widest text-neutral-400">City</label>
-                <input
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+              <div className="col-span-2 md:col-span-1">
+                <Input
+                  variant="underline"
+                  label="City"
                   placeholder="LOS ANGELES"
                   type="text"
                   value={address.city}
                   onChange={(e) => setAddress({ ...address, city: e.target.value })}
                 />
               </div>
-              <div className="col-span-2 md:col-span-1 flex flex-col gap-2">
-                <label className="text-[10px] uppercase tracking-widest text-neutral-400">Postal Code</label>
-                <input
-                  className="bg-transparent border-0 border-b border-neutral-200 focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-neutral-300"
+              <div className="col-span-2 md:col-span-1">
+                <Input
+                  variant="underline"
+                  label="Postal Code"
                   placeholder="90001"
                   type="text"
                   value={address.zip}
@@ -251,45 +252,12 @@ const Checkout = () => {
 
         {/* Right Column: Summary */}
         <div className="lg:col-span-5">
-          <div className="sticky top-40 bg-white p-12 space-y-10 border border-neutral-100">
-            <h2 className="font-sans text-[11px] tracking-[0.2em] uppercase font-bold border-b border-neutral-100 pb-6">Order Summary</h2>
-            <div className="space-y-4">
-              <div className="flex justify-between text-[13px]">
-                <span className="text-neutral-500 uppercase tracking-wider">Subtotal</span>
-                <span className="font-medium">${total.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-[13px]">
-                <span className="text-neutral-500 uppercase tracking-wider">Shipping</span>
-                <span className="font-medium">FREE</span>
-              </div>
-            </div>
-            <div className="pt-6 border-t border-black flex justify-between items-baseline">
-              <span className="text-xl font-bold uppercase tracking-tighter">Total</span>
-              <span className="text-4xl font-black tracking-tighter">${total.toFixed(2)}</span>
-            </div>
-            <div className="space-y-4 pt-10">
-              <button
-                type="submit"
-                form="checkout-form"
-                disabled={loading || items.length === 0}
-                className="w-full bg-black text-white py-6 font-bold uppercase tracking-[0.2em] text-xs hover:bg-neutral-800 transition-all disabled:opacity-50"
-              >
-                {loading ? 'PROCESSING...' : 'Proceed to Payment'}
-              </button>
-              <p className="text-[9px] text-center text-neutral-400 uppercase tracking-widest leading-relaxed">
-                By clicking &quot;Complete Purchase&quot;, you agree to our terms of engineering and shipping protocols.
-              </p>
-            </div>
-            <div className="pt-20">
-              <div className="bg-neutral-50 p-6 flex items-start gap-4">
-                <Verified size={20} className="text-neutral-400" />
-                <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest mb-1">Authenticity Guaranteed</h4>
-                  <p className="text-[10px] text-neutral-500 leading-relaxed uppercase tracking-tight">Every component is engineered and verified at our central lab prior to dispatch.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CheckoutSummary 
+            total={total} 
+            itemsLength={items.length} 
+            loading={loading} 
+            formId="checkout-form" 
+          />
         </div>
       </div>
     </main>

@@ -1,13 +1,25 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useState, Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen w-full items-center justify-center bg-white font-mono text-black">
+        <span className="text-[10px] tracking-widest uppercase">Initializing...</span>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -58,7 +70,6 @@ export default function LoginPage() {
 
       const data = await res.json();
       
-      // Store token
       localStorage.setItem('admin_token', data.access_token);
       router.replace('/');
     } catch (err: any) {
@@ -81,47 +92,36 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500">
-              Operator Identifier
-            </label>
-            <input
-              type="email"
-              required
-              className="w-full border-b-2 border-neutral-200 py-3 text-sm font-medium outline-none transition-colors focus:border-black"
-              placeholder="operator@smash.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          <Input
+            label="Operator Identifier"
+            type="email"
+            required
+            variant="underline"
+            placeholder="operator@smash.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500">
-              Passcode
-            </label>
-            <input
-              type="password"
-              required
-              className="w-full border-b-2 border-neutral-200 py-3 text-sm font-medium outline-none transition-colors focus:border-black"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <Input
+            label="Passcode"
+            type="password"
+            required
+            variant="underline"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={error}
+          />
 
-          {error && (
-            <p className="text-xs font-bold text-red-600 tracking-wider">
-              [ERROR] {error}
-            </p>
-          )}
-
-          <button
+          <Button
             type="submit"
-            disabled={isLoading}
-            className="mt-4 w-full bg-black py-4 text-xs font-bold tracking-[0.2em] text-white uppercase transition-all hover:bg-neutral-800 disabled:opacity-50"
+            isLoading={isLoading}
+            className="mt-4"
+            fullWidth
+            size="lg"
           >
-            {isLoading ? 'Authenticating...' : 'Authorize Login'}
-          </button>
+            Authorize Login
+          </Button>
         </form>
       </div>
     </div>

@@ -1,17 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+
+const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
 
 export default function SettingsPage() {
-  const router = useRouter();
-
   const logout = () => {
-    try {
-      localStorage.removeItem("admin_token");
-    } finally {
-      // router.replace("/login");
-      router.push("")
-    }
+    localStorage.removeItem("admin_token");
+    window.location.href = `${FRONTEND_URL}/login`;
   };
 
   return (
@@ -49,13 +45,13 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={logout}
-              className="bg-black text-white text-[10px] font-bold tracking-[0.2em] uppercase px-8 py-4 hover:bg-neutral-800 transition-colors"
+              size="lg"
             >
               Logout
-            </button>
+            </Button>
           </div>
         </section>
       </div>

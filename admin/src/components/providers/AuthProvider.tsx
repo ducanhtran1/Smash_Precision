@@ -14,14 +14,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       const token = localStorage.getItem('admin_token');
       
       if (!token) {
-        if (pathname !== '/login') router.push('/login');
+        if (pathname !== '/login') router.replace('/login');
         setIsAuthenticated(false);
         return;
       }
 
       try {
         const res = await fetch(`${API_BASE}/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
         });
         
         if (!res.ok) throw new Error('Token invalid');
@@ -30,9 +31,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         if (profile.role !== 'admin') throw new Error('Not admin');
         
         setIsAuthenticated(true);
+        if (pathname === '/login') {
+          router.replace('/');
+        }
       } catch (err) {
         localStorage.removeItem('admin_token');
-        if (pathname !== '/login') router.push('/login');
+        if (pathname !== '/login') router.replace('/login');
         setIsAuthenticated(false);
       }
     };

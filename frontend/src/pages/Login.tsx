@@ -4,6 +4,9 @@ import { signInWithGoogle } from '@/src/lib/firebase';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Mail, Lock } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3002';
+
 const Login = () => {
   const navigate = useNavigate();
   const { user, login: localLogin } = useAuth();
@@ -21,6 +24,25 @@ const Login = () => {
     setErrorMsg('');
     try {
       await localLogin(email, password);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/dashboard');
+        return;
+      }
+
+      const profileRes = await fetch(`${API_URL}/api/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        if (profile?.role === 'admin') {
+          const redirectUrl = `${ADMIN_URL}/login?token=${encodeURIComponent(token)}`;
+          window.location.href = redirectUrl;
+          return;
+        }
+      }
+
       navigate('/dashboard');
     } catch (error: any) {
       setErrorMsg(error.message || "Invalid email or password");

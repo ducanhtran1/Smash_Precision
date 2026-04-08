@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Bell, UserCircle, Search } from "lucide-react";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getAuthHeaders } from "@/lib/api";
 
 type User = {
   id: string;
@@ -20,10 +20,15 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/users`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE}/users`, {
+        cache: "no-store",
+        headers: getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setUsers(data);
+      } else {
+        setUsers([]);
       }
     } catch (e) {
       console.error(e);
@@ -40,7 +45,7 @@ export default function UsersPage() {
     try {
       const res = await fetch(`${API_BASE}/users/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ isActive: currentStatus === false ? true : false }),
       });
       if (res.ok) {

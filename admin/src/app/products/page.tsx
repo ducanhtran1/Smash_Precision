@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Bell, UserCircle, Search, Edit2, Copy, Trash2, X } from "lucide-react";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getAuthHeaders } from "@/lib/api";
 
 type Product = {
   id: string;
@@ -67,6 +67,7 @@ export default function ProductsPage() {
       const isCreate = formType === "CREATE";
       const res = await fetch(`${API_BASE}/products${isCreate ? "" : `/${currentId}`}`, {
         method: isCreate ? "POST" : "PATCH",
+        headers: getAuthHeaders(),
         body: payload, // Browser automatically sets Content-Type to multipart/form-data with boundary
       });
 
@@ -91,7 +92,10 @@ export default function ProductsPage() {
   const confirmDelete = async () => {
     if (!productToDelete) return;
     try {
-      const res = await fetch(`${API_BASE}/products/${productToDelete}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/products/${productToDelete}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       if (res.ok) {
         fetchProducts();
       } else {

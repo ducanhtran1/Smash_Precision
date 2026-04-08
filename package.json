@@ -3,12 +3,14 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "admin"
   ],
   "scripts": {
     "dev:frontend": "yarn workspace react-example dev",
     "dev:backend": "yarn workspace backend start:dev",
-    "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
+    "dev:admin": "yarn workspace admin dev -- -p 3002",
+    "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\" \"yarn dev:admin\"",
     "lint": "yarn workspace backend lint && yarn workspace react-example lint",
     "lint:fix": "yarn workspace backend lint && yarn workspace backend format && yarn workspace react-example lint",
     "postinstall": "echo 'Monorepo setup complete.'"

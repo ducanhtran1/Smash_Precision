@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -11,6 +13,32 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const tokenFromQuery = searchParams.get('token');
+    if (!tokenFromQuery) return;
+
+    const consumeToken = async () => {
+      try {
+        const profileRes = await fetch(`${API_BASE}/auth/profile`, {
+          headers: { Authorization: `Bearer ${tokenFromQuery}` },
+          cache: 'no-store',
+        });
+        if (!profileRes.ok) throw new Error('Token invalid');
+
+        const profile = await profileRes.json();
+        if (profile.role !== 'admin') throw new Error('Not admin');
+
+        localStorage.setItem('admin_token', tokenFromQuery);
+        router.replace('/');
+      } catch {
+        setError('Unauthorized Access. System Operator clearance required.');
+      }
+    };
+
+    consumeToken();
+  }, [router, searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,19 +60,7 @@ export default function LoginPage() {
       
       // Store token
       localStorage.setItem('admin_token', data.access_token);
-      
-      // Verify Role
-      const profileRes = await fetch(`${API_BASE}/auth/profile`, {
-        headers: { Authorization: `Bearer ${data.access_token}` }
-      });
-      const profile = await profileRes.json();
-
-      if (profile.role !== 'admin') {
-        localStorage.removeItem('admin_token');
-        throw new Error('Unauthorized Access. System Operator clearance required.');
-      }
-
-      router.push('/');
+      router.replace('/');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {

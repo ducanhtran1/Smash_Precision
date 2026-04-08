@@ -30,8 +30,14 @@ export default function Dashboard() {
     fetch(`${API_BASE}/analytics`)
       .then(res => res.json())
       .then(data => {
-        setMetrics(data.metrics);
-        setTopProducts(data.topProducts);
+        const safeMetrics = {
+          totalRevenue: Number(data?.metrics?.totalRevenue ?? 0),
+          activeUsers: Number(data?.metrics?.activeUsers ?? 0),
+          orderVolume: Number(data?.metrics?.orderVolume ?? 0),
+          conversionRate: String(data?.metrics?.conversionRate ?? "0%"),
+        };
+        setMetrics(safeMetrics);
+        setTopProducts(Array.isArray(data?.topProducts) ? data.topProducts : []);
       })
       .catch(console.error);
   }, []);

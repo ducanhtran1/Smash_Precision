@@ -58,7 +58,7 @@ const OrderHistory = () => {
                 <span className="font-sans text-[10px] tracking-[0.1em] uppercase bg-black text-white px-3 py-1">{order.status}</span>
               </div>
               <div className="mt-4 md:mt-0 font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400">
-                Placed {new Date(order.createdAt).toLocaleDateString()}
+                Placed {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '—'}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
@@ -66,7 +66,11 @@ const OrderHistory = () => {
                 {(() => {
                   const firstItem = order.items?.[0];
                   const img = firstItem?.product?.imageUrl || firstItem?.imageUrl || '';
-                  const name = firstItem?.product?.name || firstItem?.productName || 'Unknown item';
+                  const name =
+                    firstItem?.product?.name ||
+                    firstItem?.productName ||
+                    (firstItem?.productId ? `Item ${String(firstItem.productId).slice(0, 8).toUpperCase()}` : null) ||
+                    ((order.items?.length ?? 0) === 0 ? 'No items recorded' : 'Unknown item');
                   return img ? (
                     <img
                       className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
@@ -79,12 +83,27 @@ const OrderHistory = () => {
                 })()}
               </div>
               <div className="md:col-span-5 space-y-4">
-                <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400">Contents ({order.items.length})</div>
+                <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400">
+                  Contents ({order.items?.length ?? 0})
+                </div>
                 <h3 className="text-2xl font-bold tracking-tighter uppercase">
-                  {(order.items?.[0]?.product?.name || order.items?.[0]?.productName || 'Unknown item')}
-                  {(order.items?.length ?? 0) > 1 && `+ ${(order.items?.length ?? 0) - 1} more`}
+                  {(() => {
+                    const firstItem = order.items?.[0];
+                    const firstName =
+                      firstItem?.product?.name ||
+                      firstItem?.productName ||
+                      (firstItem?.productId
+                        ? `Item ${String(firstItem.productId).slice(0, 8).toUpperCase()}`
+                        : null) ||
+                      ((order.items?.length ?? 0) === 0 ? 'No items recorded' : 'Unknown item');
+                    const count = order.items?.length ?? 0;
+                    return `${firstName}${count > 1 ? ` + ${count - 1} more` : ''}`;
+                  })()}
                 </h3>
                 <p className="text-neutral-600 max-w-sm leading-relaxed">Precision engineered components for high-performance athletic pursuit.</p>
+                <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-neutral-400">
+                  Created {order.createdAt ? new Date(order.createdAt).toLocaleString() : '—'}
+                </div>
                 <div className="pt-4 flex items-center space-x-6">
                   <Link to={`/confirmation/${order.id}`} className="bg-black text-white px-8 py-3 font-sans text-[10px] tracking-[0.1em] uppercase hover:bg-neutral-800 transition-colors">Order Details</Link>
                 </div>

@@ -50,8 +50,17 @@ function LoginContent() {
         localStorage.setItem('admin_token', tokenFromQuery);
         router.replace('/');
       } catch (err: any) {
-        setError('Unauthorized Access. System Operator clearance required.');
-        setDebug(err?.message || 'Unknown error while consuming token.');
+        const msg = err?.message || 'Unknown error while consuming token.';
+        const isNetwork =
+          msg === 'Failed to fetch' ||
+          msg === 'Load failed' ||
+          /network|fetch/i.test(String(msg));
+        setError(
+          isNetwork
+            ? 'Cannot reach API (often CORS). Set Railway ADMIN_FRONTEND_URL=https://smash-precision-admin.vercel.app and redeploy backend.'
+            : 'Unauthorized Access. System Operator clearance required.',
+        );
+        setDebug(msg);
       }
     };
 
@@ -80,8 +89,17 @@ function LoginContent() {
       localStorage.setItem('admin_token', data.access_token);
       router.replace('/');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
-      setDebug(err?.message || 'Unknown login error.');
+      const msg = err?.message || 'Login failed';
+      const isNetwork =
+        msg === 'Failed to fetch' ||
+        msg === 'Load failed' ||
+        /network|fetch/i.test(String(msg));
+      setError(
+        isNetwork
+          ? 'Cannot reach API (often CORS). Add your admin Vercel URL to Railway ADMIN_FRONTEND_URL or FRONTEND_URL, then redeploy backend.'
+          : msg,
+      );
+      setDebug(msg);
     } finally {
       setIsLoading(false);
     }

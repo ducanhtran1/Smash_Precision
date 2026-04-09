@@ -1,6 +1,8 @@
-// Base API configuration for the admin panel
-
-export const API_BASE = "http://localhost:3001/api";
+// Base API configuration for the admin panel.
+// Must match login page: use NEXT_PUBLIC_API_URL on Vercel/Railway (AuthProvider + fetcher use this).
+// Hardcoding localhost here caused production loops: login OK → / → verify hits localhost → fail → /login → repeat.
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
 
 /** Bearer token for admin API calls (DELETE/PATCH guarded routes). */
 export function getAuthHeaders(): Record<string, string> {

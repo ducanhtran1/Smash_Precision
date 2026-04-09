@@ -23,6 +23,7 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [debug, setDebug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,19 +34,33 @@ function LoginContent() {
 
     const consumeToken = async () => {
       try {
+        setDebug(`Verifying token via ${API_BASE}/auth/profile`);
         const profileRes = await fetch(`${API_BASE}/auth/profile`, {
           headers: { Authorization: `Bearer ${tokenFromQuery}` },
           cache: 'no-store',
         });
-        if (!profileRes.ok) throw new Error('Token invalid');
+        if (!profileRes.ok) {
+          const body = await profileRes.text();
+          throw new Error(`Token verify failed (${profileRes.status}): ${body}`);
+        }
 
         const profile = await profileRes.json();
-        if (profile.role !== 'admin') throw new Error('Not admin');
+        if (profile.role !== 'admin') throw new Error(`Role is "${profile.role ?? 'unknown'}"`);
 
         localStorage.setItem('admin_token', tokenFromQuery);
         router.replace('/');
-      } catch {
-        setError('Unauthorized Access. System Operator clearance required.');
+      } catch (err: any) {
+        const msg = err?.message || 'Unknown error while consuming token.';
+        const isNetwork =
+          msg === 'Failed to fetch' ||
+          msg === 'Load failed' ||
+          /network|fetch/i.test(String(msg));
+        setError(
+          isNetwork
+            ? 'Cannot reach API (often CORS). Set Railway ADMIN_FRONTEND_URL=https://smash-precision-admin.vercel.app and redeploy backend.'
+            : 'Unauthorized Access. System Operator clearance required.',
+        );
+        setDebug(msg);
       }
     };
 
@@ -58,6 +73,7 @@ function LoginContent() {
     setError('');
 
     try {
+      setDebug(`Logging in via ${API_BASE}/auth/login`);
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,7 +89,17 @@ function LoginContent() {
       localStorage.setItem('admin_token', data.access_token);
       router.replace('/');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      const msg = err?.message || 'Login failed';
+      const isNetwork =
+        msg === 'Failed to fetch' ||
+        msg === 'Load failed' ||
+        /network|fetch/i.test(String(msg));
+      setError(
+        isNetwork
+          ? 'Cannot reach API (often CORS). Add your admin Vercel URL to Railway ADMIN_FRONTEND_URL or FRONTEND_URL, then redeploy backend.'
+          : msg,
+      );
+      setDebug(msg);
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +138,11 @@ function LoginContent() {
             onChange={(e) => setPassword(e.target.value)}
             error={error}
           />
+          {debug && (
+            <p className="text-[10px] leading-relaxed text-neutral-500 break-all">
+              {debug}
+            </p>
+          )}
 
           <Button
             type="submit"

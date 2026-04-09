@@ -8,7 +8,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 
 @Processor('orders', {
   stalledInterval: 300000, // Check for stalled jobs every 5 mins instead of 30s
-  maxStalledCount: 1,      // Minimal retries on stalls
+  maxStalledCount: 1, // Minimal retries on stalls
 })
 export class OrdersProcessor extends WorkerHost {
   private readonly logger = new Logger(OrdersProcessor.name);

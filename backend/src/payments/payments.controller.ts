@@ -80,7 +80,7 @@ export class PaymentsController {
 
     // Use the first URL if FRONTEND_URL contains a comma-separated list
     const rawFrontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    let frontendUrl = rawFrontendUrl.split(',')[0].trim();
+    let frontendUrl = rawFrontendUrl.split(',')[0].trim().replace(/\/+$/, '');
     if (!frontendUrl.startsWith('http')) {
       frontendUrl = `https://${frontendUrl}`;
     }
@@ -188,7 +188,7 @@ export class PaymentsController {
   @common.Get('vnpay-return')
   vnpayReturn(@common.Query() query: any, @common.Res() res: any) {
     const rawFrontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    let frontendUrl = rawFrontendUrl.split(',')[0].trim().replace(/\/$/, '');
+    let frontendUrl = rawFrontendUrl.split(',')[0].trim().replace(/\/+$/, '');
     if (!frontendUrl.startsWith('http')) frontendUrl = `https://${frontendUrl}`;
 
     if (this.vnpayService.verifyIpn(query)) {

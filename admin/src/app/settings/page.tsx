@@ -7,7 +7,8 @@ const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3
 export default function SettingsPage() {
   const logout = () => {
     localStorage.removeItem("admin_token");
-    window.location.href = `${FRONTEND_URL}/login`;
+    const base = FRONTEND_URL.replace(/\/+$/, "");
+    window.location.href = `${base}/login`;
   };
 
   return (
